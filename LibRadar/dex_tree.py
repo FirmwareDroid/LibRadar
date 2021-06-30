@@ -26,7 +26,7 @@ import hashlib
 import csv
 import redis
 import zlib
-import rputil
+from .rputil import *
 
 
 # tag_rules

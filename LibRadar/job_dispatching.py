@@ -35,7 +35,7 @@ import glob
 from ._settings import *
 import hashlib
 import zipfile
-import dex_extracting
+from .dex_extracting import *
 import redis
 
 

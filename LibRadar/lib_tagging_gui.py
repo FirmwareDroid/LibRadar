@@ -36,7 +36,7 @@
 #       Run this script or just modify Data/IntermediateData/tag_rules.csv
 
 
-import lib_tagging
+from .lib_tagging import *
 import csv
 import os
 from ._settings import FILE_RULE

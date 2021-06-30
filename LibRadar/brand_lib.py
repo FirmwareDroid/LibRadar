@@ -20,7 +20,7 @@
 #   When you find an APK file has a lib, but you could not find it in my database, you could just use this script to
 #   insert it into database with force.
 
-import libradar
+from .libradar import *
 import sys
 
 

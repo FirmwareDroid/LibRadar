@@ -1,6 +1,6 @@
 import unittest
 
-from rputil import Util
+from .rputil import Util
 
 class TestUtil(unittest.TestCase):
 
