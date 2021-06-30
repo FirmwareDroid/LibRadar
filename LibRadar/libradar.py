@@ -21,7 +21,7 @@
 
 
 import sys
-from _settings import *
+from ._settings import *
 import dex_tree
 import dex_parser
 import hashlib

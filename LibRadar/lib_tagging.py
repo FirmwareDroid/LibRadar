@@ -23,7 +23,7 @@
 import redis
 import csv
 import os.path
-from _settings import *
+from ._settings import *
 
 
 class Tagger:

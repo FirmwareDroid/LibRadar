@@ -91,7 +91,7 @@ import hashlib
 import redis
 import dex_parser
 import time
-from _settings import *
+from ._settings import *
 import sys
 
 

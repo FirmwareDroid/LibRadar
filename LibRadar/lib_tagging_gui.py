@@ -39,7 +39,7 @@
 import lib_tagging
 import csv
 import os
-from _settings import FILE_RULE
+from ._settings import FILE_RULE
 
 from Tkinter import *           # 导入 Tkinter 库
 import ttk

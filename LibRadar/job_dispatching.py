@@ -32,7 +32,7 @@
 from multiprocessing import Pool
 import multiprocessing
 import glob
-from _settings import *
+from ._settings import *
 import hashlib
 import zipfile
 import dex_extracting

@@ -57,7 +57,7 @@ import os.path
 import subprocess
 # ## import redis
 import glob
-from _settings import *
+from ._settings import *
 
 """
     Information about Database.

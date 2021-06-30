@@ -18,10 +18,6 @@
 #
 #   created at 2017/01/09
 
-import binascii
-import redis
-from _settings import *
-
 
 # deprecated 2017-04-09
 def dump_database():

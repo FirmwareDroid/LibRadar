@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from _settings import *
+from ._settings import *
 import redis
 
 THRESHOLD = 10

@@ -16,7 +16,7 @@
 
 # Utility for repackage detection use
 
-from _settings import *
+from ._settings import *
 
 class Util(object):
     """
