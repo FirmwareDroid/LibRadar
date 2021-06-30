@@ -22,7 +22,7 @@ if os.path.exists(FILE_RULE):
 cursor = 0
 for i in range(7255):#255):
     if i % 10 == 0:
-        print ("Progress:%d" % i)
+        print("Progress:%d" % i)
     res = db.hscan(name="feature_cnt", cursor=cursor, count=1000)
     cursor = res[0]
     for i in res[1]:
@@ -49,5 +49,5 @@ for i in range(7255):#255):
 
 
 for r in result:
-    print r
-print len(result)
+    print(r)
+print(len(result))

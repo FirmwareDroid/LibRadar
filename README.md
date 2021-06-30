@@ -1,7 +1,7 @@
-# LibRadar
-LibRadar is an automatic tool for Android library detection.
-
-Upload your apk file and LibRadar can detect third-party libraries in Android apps accurately and instantly.
+# LibRadar - Fork for FirmwareDroid
+LibRadar is an automatic tool for Android library detection. Upload your apk file and LibRadar can detect third-party 
+libraries in Android apps accurately and instantly. Since the original repository is outdated this repo 
+contains an updated version of LibRadar for Python-3.
 
 ## Features
 
@@ -39,34 +39,3 @@ If you want an online trial, just click http://radar.pkuos.org/. (Updated to  ve
 |*Not Implemented*|csp|Current Specified Package Name|The sub-package (a part of the whole package) from your given APK that finally, exactly matched with what in the database.|
 |*Not Implemented*|sp|Specified Package Name|The sub-package(a part of the whole package) that exactly matched with that in your APK.|
 
-## Dev Environment
-
-* PyPy Version(Optional):
-```
-Python 2.7.12 (aff251e54385, Nov 09 2016, 17:25:49)
-[PyPy 5.6.0 with GCC 4.2.1 Compatible Apple LLVM 5.1 (clang-503.0.40)] on darwin
-Type "help", "copyright", "credits" or "license" for more information.
-```
-
-* Python Version:
-```
-Python 2.7.12 (v2.7.12:d33e0cf91556, Jun 26 2016, 12:10:39)
-[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
-Type "help", "copyright", "credits" or "license" for more information.
-```
-
-* redis Version :
-```
-Redis server v=3.2.5 sha=00000000:0 malloc=libc bits=64 build=d73d39f287fb87a1
-```
-
-* IDE :
-```
-PyCharm 2016.3.2
-Build #PY-163.10154.50, built on December 29, 2016
-Licensed to Ziang Ma
-Subscription is active until September 15, 2017
-For educational use only.
-JRE: 1.8.0_112-release-408-b6 x86_64
-JVM: OpenJDK 64-Bit Server VM by JetBrains s.r.o
-```

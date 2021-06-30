@@ -53,7 +53,8 @@
 #   2017/01/10
 
 import os.path
-import commands
+# import commands --> deprecated
+import subprocess
 # ## import redis
 import glob
 from _settings import *
@@ -133,7 +134,7 @@ class ApiDictionaryGenerator(Singleton):
                 I don't know what happened.
         """
         # run `jad` command as a test here to exam if jad is installed.
-        status, out = commands.getstatusoutput('jad')
+        status, out = subprocess.getstatusoutput('jad')
         if status == 32512:
             logger.critical("Jad is not runnable. please put `tool/jad` into your $PATH environment.")
             raise AssertionError

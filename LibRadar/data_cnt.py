@@ -25,7 +25,7 @@ for i in range(7255):
             anwser = db.hget(name="feature_weight", key=k)
             po_list.append((int(anwser),db.hget(name="un_ob_pn", key=k)))
 
-print counter
+print(counter)
 po_list.sort(key=lambda x:(-x[0]))
 for item in po_list:
-    print item
+    print(item)

@@ -89,7 +89,7 @@ class TreeNode(object):
         current_depth = 0 if self.pn == "" else self.pn.count('/') + 1
         target_depth = package_name.count('/') + 1
         if current_depth == target_depth:
-            yes_or_no = raw_input("Warning: Brand %s as a new library? (Y/n)" % self.pn)
+            yes_or_no = input("Warning: Brand %s as a new library? (Y/n)" % self.pn)
             if yes_or_no == 'Y' or yes_or_no == 'y':
                 try:
                     self.db.hincrby(name=DB_FEATURE_CNT, key=self.sha256, amount=10000000)

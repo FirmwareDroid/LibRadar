@@ -103,7 +103,7 @@ class DexExtractorWrapper:
             logger.critical("file path %s is not a file" % self.app_path)
             raise AssertionError
         file_sha256 = hashlib.sha256()
-        f = file(self.app_path, 'rb')
+        f = open(self.app_path, 'rb')   # Changed
         while True:
             block = f.read(4096)
             if not block:

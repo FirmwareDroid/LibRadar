@@ -90,7 +90,7 @@ class Tagger:
             self.features.append((key, curr_count, curr_weight, f_un_ob_pn[key]))
         # sort with count and weight
         # count is more important so I gave it 3 times weight.
-        self.features.sort(cmp=lambda x, y: cmp(y[1]*3 + y[2], x[1] * 3 + x[2]))
+        self.features.sort(cmp=lambda x, y: __cmp__(y[1]*3 + y[2], x[1] * 3 + x[2]))
         return self.features
 
     def set_rule(self, ipt_pn, ipt_real_name, ipt_type, ipt_website):
@@ -182,7 +182,7 @@ class TaggerCli:
             print("  Number of repetitions: %s" % self.features[feature_iterator][1])
             print("  API contains: %s" % self.features[feature_iterator][2])
             print("-" * 60)
-            ipt_know = raw_input("Do you know this library? (Y:Yes/ N:No/ W: It's not a library!)")
+            ipt_know = input("Do you know this library? (Y:Yes/ N:No/ W: It's not a library!)")
             if ipt_know == 'N' or ipt_know == 'n':
                 print("OK, next one.")
                 feature_iterator += 1
@@ -193,25 +193,25 @@ class TaggerCli:
             if ipt_know != 'Y' and ipt_know != 'y':
                 print("Sorry? I don't know what you mean.")
                 continue
-            ipt_pn = raw_input("Please input its true package name: ")
+            ipt_pn = input("Please input its true package name: ")
             # input longer warning!
             if len(ipt_pn) > len(self.features[feature_iterator][3]):
                 logger.warning("Input longer that the original potential package name???")
-                ipt_re = raw_input("Insist(Y/N).")
+                ipt_re = input("Insist(Y/N).")
                 if ipt_re == 'N' or ipt_re == 'n':
                     continue
             # prefix not the same warning!
             if self.features[feature_iterator][3][:len(ipt_pn)] != ipt_pn:
                 logger.warning("Prefix not the same??? %s,%s" % (self.features[feature_iterator][3], ipt_pn))
-                ipt_re = raw_input("Insist(Y/N).")
+                ipt_re = input("Insist(Y/N).")
                 if ipt_re == 'N' or ipt_re == 'n':
                     continue
             # Real Name
-            ipt_real_name = raw_input("Input Library's real name: ")
+            ipt_real_name = input("Input Library's real name: ")
             # type
-            ipt_lib_type = raw_input("Input Library Type: ")
+            ipt_lib_type = input("Input Library Type: ")
             # Official website
-            ipt_website = raw_input("Input Official Website: ")
+            ipt_website = input("Input Official Website: ")
             self.tagger.set_rule(ipt_pn, ipt_real_name, ipt_lib_type, ipt_website)
 
             # Next

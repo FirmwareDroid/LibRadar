@@ -155,7 +155,7 @@ class PackageNodeList:
         Flush databases
         :return: None
         """
-        certain_flush = raw_input("You really want to flush database?(Y/N)")
+        certain_flush = input("You really want to flush database?(Y/N)") # CHANGED
         if certain_flush != "Y":
             logger.info("Do not flush.")
             return
@@ -380,7 +380,7 @@ class DexExtractor:
         """
             Sort the info list with the package name.
         """
-        class_info_list.sort(cmp=lambda x, y: cmp(x[0], y[0]))
+        class_info_list.sort(cmp=lambda x, y: __cmp__(x[0], y[0]))
         for class_info in class_info_list:
             # logger.debug("class_name %s" % class_name)
             class_name = class_info[0]

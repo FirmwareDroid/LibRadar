@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding:utf-8
+# coding:utf-8
 
 # BSD 2-Clause License
 #
@@ -26,9 +26,10 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import codecs
 import sys
 import binascii
+
 
 def byte_to_buma(val):
     binVal = bin(val)[2:].zfill(8)
@@ -36,12 +37,13 @@ def byte_to_buma(val):
         return val
     sb = ''
     for i in range(7):
-        if binVal[i+1:i+2] == '0':
+        if binVal[i + 1:i + 2] == '0':
             sb += '1'
         else:
             sb += '0'
 
     return -(int(sb, 2) + 1)
+
 
 def word_to_buma(val):
     binVal = bin(val)[2:].zfill(16)
@@ -49,12 +51,13 @@ def word_to_buma(val):
         return val
     sb = ''
     for i in range(15):
-        if binVal[i+1:i+2] == '0':
+        if binVal[i + 1:i + 2] == '0':
             sb += '1'
         else:
             sb += '0'
 
     return -(int(sb, 2) + 1)
+
 
 """
 
@@ -76,81 +79,84 @@ def dword_to_buma(val):
 """
 ############### OPCODE #################
 """
+
+
 def getOpCode(opcode):
     """
     参考: dalvik-bytecode
     """
-    if opcode == 0x00 : return '10x', 'nop'
-    if opcode == 0x01 : return '12x', 'move vA, vB'
-    if opcode == 0x02 : return '22x', 'move/from16 vAA, vBBBB'
-    if opcode == 0x03 : return '32x', 'move/16 vAAAA, vBBBB'
-    if opcode == 0x04 : return '12x', 'move-wide vA, vB'
-    if opcode == 0x05 : return '22x', 'move-wide/from16 vAA, vBBBB'
-    if opcode == 0x06 : return '32x', 'move-wide/16 vAAAA, vBBBB'
-    if opcode == 0x07 : return '12x', 'move-object vA, vB'
-    if opcode == 0x08 : return '22x', 'move-object/from16 vAA, vBBBB'
-    if opcode == 0x09 : return '32x', 'move-object/16 vAAAA, vBBBB'
-    if opcode == 0xa : return '11x', 'move-result vAA'
-    if opcode == 0xb : return '11x', 'move-result-wide vAA'
-    if opcode == 0xc : return '11x', 'move-result-object vAA'
-    if opcode == 0xd : return '11x', 'move-exception vAA'
-    if opcode == 0xe : return '10x', 'return-void'
-    if opcode == 0xf : return '11x', 'return vAA'
-    if opcode == 0x10 : return '11x', 'return-wide'
-    if opcode == 0x11 : return '11x', 'return-object vAA'
-    if opcode == 0x12 : return '11n', 'const/4 vA, #+B'
-    if opcode == 0x13 : return '21s', 'const/16 vAA, #+BBBB'
-    if opcode == 0x14 : return '31i', 'const vAA, #+BBBBBBBB'
-    if opcode == 0x15 : return '21h', 'const/high16 vAA, #+BBBB0000'
-    if opcode == 0x16 : return '21s', 'const-wide/16 vAA, #+BBBB'
-    if opcode == 0x17 : return '31i', 'const-wide/32 vAA, #+BBBBBBBB'
-    if opcode == 0x18 : return '51l', 'const-wide vAA, #+BBBBBBBBBBBBBBBB'
-    if opcode == 0x19 : return '21h', 'const-wide/high16 vAA, #+BBBB000000000000'
-    if opcode == 0x1a : return '21c', 'const-string vAA, string@BBBB'
-    if opcode == 0x1b : return '31c', 'const-string/jumbo vAA, string@BBBBBBBB'
-    if opcode == 0x1c : return '21c', 'const-class vAA, type@BBBB'
-    if opcode == 0x1d : return '11x', 'monitor-enter vAA'
-    if opcode == 0x1e : return '11x', 'monitor-exit vAA'
-    if opcode == 0x1f : return '21c', 'check-cast vAA, type@BBBB'
-    if opcode == 0x20 : return '22c', 'instance-of vA, vB, type@CCCC'
-    if opcode == 0x21 : return '12x', 'array-length vA, vB'
-    if opcode == 0x22 : return '21c', 'new-instance vAA, type@BBBB'
-    if opcode == 0x23 : return '22c', 'new-array vA, vB, type@CCCC'
-    if opcode == 0x24 : return '35c', 'filled-new-array {vD, vE, vF, vG, vA}, type@CCCC'
-    if opcode == 0x25 : return '3rc', 'filled-new-array/range {vCCCC .. vNNNN}, type@BBBB'
-    if opcode == 0x26 : return '31t', 'fill-array-data vAA, +BBBBBBBB'
-    if opcode == 0x27 : return '11x', 'throw vAA'
-    if opcode == 0x28 : return '10t', 'goto +AA'
-    if opcode == 0x29 : return '20t', 'goto/16 +AAAA'
-    if opcode == 0x2a : return '30t', 'goto/32 +AAAAAAAA'
-    if opcode == 0x2b : return '31t', 'packed-switch vAA, +BBBBBBBB'
-    if opcode == 0x2c : return '31t', 'sparse-switch vAA, +BBBBBBBB'
-    if opcode >= 0x2d and opcode <= 0x31 : return '23x', 'cmpkind vAA, vBB, vCC'
-    if opcode >= 0x32 and opcode <= 0x37 : return '22t', 'if-test vA, vB, +CCCC'
-    if opcode >= 0x38 and opcode <= 0x3d : return '21t', 'if-testz vAA, +BBBB'
-    if opcode >= 0x3e and opcode <= 0x43 : return '10x', 'unused'
-    if opcode >= 0x44 and opcode <= 0x51 : return '23x', 'arrayop vAA, vBB, vCC'
-    if opcode >= 0x52 and opcode <= 0x5f : return '22c', 'iinstanceop vA, vB, field@CCCC'
+    if opcode == 0x00: return '10x', 'nop'
+    if opcode == 0x01: return '12x', 'move vA, vB'
+    if opcode == 0x02: return '22x', 'move/from16 vAA, vBBBB'
+    if opcode == 0x03: return '32x', 'move/16 vAAAA, vBBBB'
+    if opcode == 0x04: return '12x', 'move-wide vA, vB'
+    if opcode == 0x05: return '22x', 'move-wide/from16 vAA, vBBBB'
+    if opcode == 0x06: return '32x', 'move-wide/16 vAAAA, vBBBB'
+    if opcode == 0x07: return '12x', 'move-object vA, vB'
+    if opcode == 0x08: return '22x', 'move-object/from16 vAA, vBBBB'
+    if opcode == 0x09: return '32x', 'move-object/16 vAAAA, vBBBB'
+    if opcode == 0xa: return '11x', 'move-result vAA'
+    if opcode == 0xb: return '11x', 'move-result-wide vAA'
+    if opcode == 0xc: return '11x', 'move-result-object vAA'
+    if opcode == 0xd: return '11x', 'move-exception vAA'
+    if opcode == 0xe: return '10x', 'return-void'
+    if opcode == 0xf: return '11x', 'return vAA'
+    if opcode == 0x10: return '11x', 'return-wide'
+    if opcode == 0x11: return '11x', 'return-object vAA'
+    if opcode == 0x12: return '11n', 'const/4 vA, #+B'
+    if opcode == 0x13: return '21s', 'const/16 vAA, #+BBBB'
+    if opcode == 0x14: return '31i', 'const vAA, #+BBBBBBBB'
+    if opcode == 0x15: return '21h', 'const/high16 vAA, #+BBBB0000'
+    if opcode == 0x16: return '21s', 'const-wide/16 vAA, #+BBBB'
+    if opcode == 0x17: return '31i', 'const-wide/32 vAA, #+BBBBBBBB'
+    if opcode == 0x18: return '51l', 'const-wide vAA, #+BBBBBBBBBBBBBBBB'
+    if opcode == 0x19: return '21h', 'const-wide/high16 vAA, #+BBBB000000000000'
+    if opcode == 0x1a: return '21c', 'const-string vAA, string@BBBB'
+    if opcode == 0x1b: return '31c', 'const-string/jumbo vAA, string@BBBBBBBB'
+    if opcode == 0x1c: return '21c', 'const-class vAA, type@BBBB'
+    if opcode == 0x1d: return '11x', 'monitor-enter vAA'
+    if opcode == 0x1e: return '11x', 'monitor-exit vAA'
+    if opcode == 0x1f: return '21c', 'check-cast vAA, type@BBBB'
+    if opcode == 0x20: return '22c', 'instance-of vA, vB, type@CCCC'
+    if opcode == 0x21: return '12x', 'array-length vA, vB'
+    if opcode == 0x22: return '21c', 'new-instance vAA, type@BBBB'
+    if opcode == 0x23: return '22c', 'new-array vA, vB, type@CCCC'
+    if opcode == 0x24: return '35c', 'filled-new-array {vD, vE, vF, vG, vA}, type@CCCC'
+    if opcode == 0x25: return '3rc', 'filled-new-array/range {vCCCC .. vNNNN}, type@BBBB'
+    if opcode == 0x26: return '31t', 'fill-array-data vAA, +BBBBBBBB'
+    if opcode == 0x27: return '11x', 'throw vAA'
+    if opcode == 0x28: return '10t', 'goto +AA'
+    if opcode == 0x29: return '20t', 'goto/16 +AAAA'
+    if opcode == 0x2a: return '30t', 'goto/32 +AAAAAAAA'
+    if opcode == 0x2b: return '31t', 'packed-switch vAA, +BBBBBBBB'
+    if opcode == 0x2c: return '31t', 'sparse-switch vAA, +BBBBBBBB'
+    if opcode >= 0x2d and opcode <= 0x31: return '23x', 'cmpkind vAA, vBB, vCC'
+    if opcode >= 0x32 and opcode <= 0x37: return '22t', 'if-test vA, vB, +CCCC'
+    if opcode >= 0x38 and opcode <= 0x3d: return '21t', 'if-testz vAA, +BBBB'
+    if opcode >= 0x3e and opcode <= 0x43: return '10x', 'unused'
+    if opcode >= 0x44 and opcode <= 0x51: return '23x', 'arrayop vAA, vBB, vCC'
+    if opcode >= 0x52 and opcode <= 0x5f: return '22c', 'iinstanceop vA, vB, field@CCCC'
     if opcode >= 0x60 and opcode <= 0x6d: return '21c', 'sstaticop vAA, field@BBBB'
-    if opcode >= 0x6e and opcode <= 0x72 : return '35c', 'invoke-kind {vD, vE, vF, vG, vA}, meth@CCCC'
-    if opcode == 0x73 : return '10x', 'unused'
-    if opcode >= 0x74 and opcode <= 0x78 : return '3rc', 'invoke-kind/range {vCCCC .. vNNNN}, meth@BBBB'
-    if opcode >= 0x79 and opcode <= 0x7a : return '10x', 'unused'
-    if opcode >= 0x7b and opcode <= 0x8f : return '12x', 'unop vA, vB'
-    if opcode >= 0x90 and opcode <= 0xaf : return '23x', 'binop vAA, vBB, vCC'
-    if opcode >= 0xb0 and opcode <= 0xcf : return '12x', 'binop/2addr vA, vB'
-    if opcode >= 0xd0 and opcode <= 0xd7 : return '22s', 'binop/lit16 vA, vB, #+CCCC'
-    if opcode >= 0xd8 and opcode <= 0xe2 : return '22b', 'binop/lit8 vAA, vBB, #+CC'
-    if opcode >= 0xe3 and opcode <= 0xfe : return '10x', 'unused'
-    if opcode == 0x00ff : return '41c', 'const-class/jumbo vAAAA, type@BBBBBBBB'
-    if opcode == 0x01ff : return '41c', 'check-cast/jumbo vAAAA, type@BBBBBBBB'
-    if opcode == 0x02ff : return '52c', 'instance-of/jumbo vAAAA, vBBBB, type@CCCCCCCC'
-    if opcode == 0x03ff : return '41c', 'new-instance/jumbo vAAAA, type@BBBBBBBB'
-    if opcode == 0x04ff : return '52c', 'new-array/jumbo vAAAA, vBBBB, type@CCCCCCCC'
-    if opcode == 0x05ff : return '52rc', 'filled-new-array/jumbo {vCCCC .. vNNNN}, type@BBBBBBBB'
+    if opcode >= 0x6e and opcode <= 0x72: return '35c', 'invoke-kind {vD, vE, vF, vG, vA}, meth@CCCC'
+    if opcode == 0x73: return '10x', 'unused'
+    if opcode >= 0x74 and opcode <= 0x78: return '3rc', 'invoke-kind/range {vCCCC .. vNNNN}, meth@BBBB'
+    if opcode >= 0x79 and opcode <= 0x7a: return '10x', 'unused'
+    if opcode >= 0x7b and opcode <= 0x8f: return '12x', 'unop vA, vB'
+    if opcode >= 0x90 and opcode <= 0xaf: return '23x', 'binop vAA, vBB, vCC'
+    if opcode >= 0xb0 and opcode <= 0xcf: return '12x', 'binop/2addr vA, vB'
+    if opcode >= 0xd0 and opcode <= 0xd7: return '22s', 'binop/lit16 vA, vB, #+CCCC'
+    if opcode >= 0xd8 and opcode <= 0xe2: return '22b', 'binop/lit8 vAA, vBB, #+CC'
+    if opcode >= 0xe3 and opcode <= 0xfe: return '10x', 'unused'
+    if opcode == 0x00ff: return '41c', 'const-class/jumbo vAAAA, type@BBBBBBBB'
+    if opcode == 0x01ff: return '41c', 'check-cast/jumbo vAAAA, type@BBBBBBBB'
+    if opcode == 0x02ff: return '52c', 'instance-of/jumbo vAAAA, vBBBB, type@CCCCCCCC'
+    if opcode == 0x03ff: return '41c', 'new-instance/jumbo vAAAA, type@BBBBBBBB'
+    if opcode == 0x04ff: return '52c', 'new-array/jumbo vAAAA, vBBBB, type@CCCCCCCC'
+    if opcode == 0x05ff: return '52rc', 'filled-new-array/jumbo {vCCCC .. vNNNN}, type@BBBBBBBB'
     if opcode >= 0x06ff and opcode <= 0x13ff: return '52c', 'iinstanceop/jumbo vAAAA, vBBBB, field@CCCCCCCC'
     if opcode >= 0x14ff and opcode <= 0x21ff: return '41c', 'sstaticop/jumbo vAAAA, field@BBBBBBBB'
     if opcode >= 0x22ff and opcode <= 0x26ff: return '5rc', 'invoke-kind/jumbo {vCCCC .. vNNNN}, meth@BBBBBBBB'
+
 
 """
 ############### OPCODE END #################
@@ -159,8 +165,11 @@ def getOpCode(opcode):
 """
 ############### InstrUtils #################
 """
+
+
 class DecodedInstruction(object):
     """docstring for DecodedInstruction"""
+
     def __init__(self):
         super(DecodedInstruction, self).__init__()
         self.vA = None
@@ -179,6 +188,7 @@ class DecodedInstruction(object):
         # 代码片段长度
         self.length = None
 
+
 def dexDecodeInstruction(dexFile, dexCode, offset):
     byteCounts = offset / 4
     insns = dexCode.insns
@@ -187,7 +197,7 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         return None
 
     decodedInstruction = DecodedInstruction()
-    opcode = int(insns[offset:offset+2], 16)
+    opcode = int(insns[offset:offset + 2], 16)
     formatIns, syntax = getOpCode(opcode)
 
     decodedInstruction.opcode = opcode
@@ -236,7 +246,7 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             decodedInstruction.offset = offset
             decodedInstruction.length = 4
 
-    elif formatIns == '12x': # op vA, vB
+    elif formatIns == '12x':  # op vA, vB
         # Format: B|A|op <=> op vA, vB
         op = '????'
         # (1) opcode=01 move vA, vB
@@ -253,16 +263,21 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             op = 'array-length'
         # (5) opcode7b..8f unop vA, vB
         if opcode >= 0x7b and opcode <= 0x8f:
-            unop = ['neg-int', 'not-int', 'neg-long', 'not-long', 'neg-float', 'neg-double', 'int-to-long', 'int-to-float', 'int-to-double',
-                    'long-to-int', 'long-to-float', 'long-to-double', 'float-to-int', 'float-to-long', 'float-to-double',
+            unop = ['neg-int', 'not-int', 'neg-long', 'not-long', 'neg-float', 'neg-double', 'int-to-long',
+                    'int-to-float', 'int-to-double',
+                    'long-to-int', 'long-to-float', 'long-to-double', 'float-to-int', 'float-to-long',
+                    'float-to-double',
                     'double-to-int', 'double-to-long', 'double-to-float', 'int-to-byte', 'int-to-char', 'int-to-short']
             op = unop[opcode - 0x7b]
         # (6) opcode=b0..cf binop/2addr vA, vB
         if opcode >= 0xb0 and opcode <= 0xcf:
-            ops = ['add-int/2addr', 'sub-int/2addr', 'mul-int/2addr', 'div-int/2addr', 'rem-int/2addr', 'and-int/2addr', 'or-int/2addr', 'xor-int/2addr', 'shl-int/2addr', 'shr-int/2addr', 'ushr-int/2addr',
-                     'add-long/2addr', 'sub-long/2addr', 'mul-long/2addr', 'div-long/2addr', 'rem-long/2addr', 'and-long/2addr', 'or-long/2addr', 'xor-long/2addr', 'shl-long/2addr', 'shr-long/2addr','ushr-long/2addr',
-                     'add-float/2addr', 'sub-float/2addr', 'mul-float/2addr', 'div-float/2addr', 'rem-float/2addr',
-                     'add-double/2addr', 'sub-double/2addr', 'mul-double/2addr', 'div-double/2addr', 'rem-double/2addr']
+            ops = ['add-int/2addr', 'sub-int/2addr', 'mul-int/2addr', 'div-int/2addr', 'rem-int/2addr', 'and-int/2addr',
+                   'or-int/2addr', 'xor-int/2addr', 'shl-int/2addr', 'shr-int/2addr', 'ushr-int/2addr',
+                   'add-long/2addr', 'sub-long/2addr', 'mul-long/2addr', 'div-long/2addr', 'rem-long/2addr',
+                   'and-long/2addr', 'or-long/2addr', 'xor-long/2addr', 'shl-long/2addr', 'shr-long/2addr',
+                   'ushr-long/2addr',
+                   'add-float/2addr', 'sub-float/2addr', 'mul-float/2addr', 'div-float/2addr', 'rem-float/2addr',
+                   'add-double/2addr', 'sub-double/2addr', 'mul-double/2addr', 'div-double/2addr', 'rem-double/2addr']
             op = ops[opcode - 0xb0]
 
         B = int(insns[offset + 2:offset + 3], 16)
@@ -278,8 +293,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
     elif formatIns == '11n':
         # Format: B|A|op <=> # op vA, #+B
         # (1) opcode=12 const/4 vA, #+B
-        B = int(insns[offset+2:offset+3], 16)
-        A = int(insns[offset+3:offset+4], 16)
+        B = int(insns[offset + 2:offset + 3], 16)
+        A = int(insns[offset + 3:offset + 4], 16)
 
         decodedInstruction.op = 'const/4'
         decodedInstruction.vA = A
@@ -338,7 +353,7 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
 
         decodedInstruction.op = 'goto'
         decodedInstruction.vA = AA
-        decodedInstruction.smaliCode = 'goto %s //%s' % (hex(offset/4+buma), hex(buma))
+        decodedInstruction.smaliCode = 'goto %s //%s' % (hex(offset / 4 + buma), hex(buma))
         decodedInstruction.offset = offset
         decodedInstruction.length = 4
 
@@ -347,11 +362,12 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         # (1) opcode=29 goto/16 +AAAA
         if opcode == 0x29:
             AAAA = int(insns[offset + 2:offset + 8], 16)
-            buma = word_to_buma(int(insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex'), 16))
+            buma = word_to_buma(codecs.encode(codecs.decode(int(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                                                            'hex_codec'), 16))
 
             decodedInstruction.op = 'goto/16'
             decodedInstruction.vA = AAAA
-            decodedInstruction.smaliCode = 'goto/16 %s //%s' % (hex(offset/4+buma), hex(buma))
+            decodedInstruction.smaliCode = 'goto/16 %s //%s' % (hex(offset / 4 + buma), hex(buma))
             decodedInstruction.offset = offset
             decodedInstruction.length = 8
 
@@ -373,7 +389,9 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             op = 'move-object/from16'
 
         AA = int(insns[offset + 2:offset + 4], 16)
-        BBBB = int(insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex'), 16)
+
+        BBBB = int(codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                                 'hex_codec'), 16)
 
         decodedInstruction.op = op
         decodedInstruction.vA = AA
@@ -391,12 +409,13 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             op = ops[opcode - 0x38]
 
         AA = int(insns[offset + 2:offset + 4], 16)
-        BBBB = int(insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex'), 16)
+        BBBB = int(codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                                 'hex_codec'), 16)
 
         decodedInstruction.op = op
         decodedInstruction.vA = AA
         decodedInstruction.vB = BBBB
-        decodedInstruction.smaliCode = '%s v%d, %s //+%s' % (op, AA, hex(BBBB+offset/4), hex(BBBB))
+        decodedInstruction.smaliCode = '%s v%d, %s //+%s' % (op, AA, hex(BBBB + offset / 4), hex(BBBB))
         decodedInstruction.offset = offset
         decodedInstruction.length = 8
 
@@ -411,7 +430,9 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             op = 'const-wide/16'
 
         AA = int(insns[offset + 2:offset + 4], 16)
-        BBBB = int(insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex'), 16)
+
+        BBBB = int(codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                                 'hex_codec'), 16)
 
         decodedInstruction.op = op
         decodedInstruction.vA = AA
@@ -423,7 +444,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
     elif formatIns == '21h':
         # Format: AA|op BBBB <=> op vAA, #+BBBB0000[00000000]
         AA = int(insns[offset + 2:offset + 4], 16)
-        BBBB = insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex')
+        BBBB = codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                             'hex_codec')
 
         # (1) opcode=15 const/high16 vAA, #+BBBB0000
         if opcode == 0x15:
@@ -454,7 +476,9 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         indexStr = ''
 
         AA = int(insns[offset + 2:offset + 4], 16)
-        BBBB = insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex')
+
+        BBBB = codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                             'hex_codec')
 
         # (1) opcode=1a const-string vAA, string@BBBB
         if opcode == 0x1a:
@@ -477,7 +501,7 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             indexType = 'type'
             indexStr = dexFile.getDexTypeId(int(BBBB, 16))
         # (5) opcode=60..6d sstaticop vAA, field@BBBB
-        if opcode >= 0x60 and opcode <=0x6d:
+        if opcode >= 0x60 and opcode <= 0x6d:
             sstaticop = ['sget', 'sget-wide', 'sget-object', 'sget-boolean', 'sget-byte', 'sget-char',
                          'sget-char', 'sget-short', 'sput', 'sput-wide', 'sput-object', 'sput-boolean',
                          'sput-byte', 'sput-char', 'sput-short']
@@ -500,7 +524,7 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         # (1) opcode=2d..31 cmpkind vAA, vBB, vCC
         if opcode >= 0x2d and opcode <= 0x31:
             cmpkind = ['cmpl-float', 'cmpg-float', 'cmpl-double', 'cmpg-double', 'cmp-long']
-            op =cmpkind[opcode - 0x2d]
+            op = cmpkind[opcode - 0x2d]
         # (2) opcode=44..51 arrayop vAA, vBB, vCC
         if opcode >= 0x44 and opcode <= 0x51:
             arrayop = ['aget', 'aget-wide', 'aget-object', 'aget-boolean', 'aget-byte', 'aget-char', 'aget-short',
@@ -508,8 +532,10 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             op = arrayop[opcode - 0x44]
         # (3) opcode=90..af binop vAA, vBB, vCC
         if opcode >= 0x90 and opcode <= 0xaf:
-            binop = ['add-int', 'sub-int', 'mul-int', 'div-int', 'rem-int', 'and-int', 'or-int', 'xor-int', 'shl-int', 'shr-int', 'ushr-int',
-                     'add-long', 'sub-long', 'mul-long', 'div-long', 'rem-long', 'and-long', 'or-long', 'xor-long', 'shl-long', 'shr-long', 'ushr-long',
+            binop = ['add-int', 'sub-int', 'mul-int', 'div-int', 'rem-int', 'and-int', 'or-int', 'xor-int', 'shl-int',
+                     'shr-int', 'ushr-int',
+                     'add-long', 'sub-long', 'mul-long', 'div-long', 'rem-long', 'and-long', 'or-long', 'xor-long',
+                     'shl-long', 'shr-long', 'ushr-long',
                      'add-float', 'sub-float', 'mul-float', 'div-float', 'rem-float',
                      'add-double', 'sub-double', 'mul-double', 'div-double', 'rem-double']
             op = binop[opcode - 0x90]
@@ -550,18 +576,19 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         # Format: B|A|op CCCC <=> op vA, vB, +CCCC
         op = '????'
         # (1) opcode=32..37 if-test vA, vB, +CCCC
-        if opcode >=0x32 and opcode <= 0x37:
+        if opcode >= 0x32 and opcode <= 0x37:
             ops = ['if-eq', 'if-ne', 'if-lt', 'if-ge', 'if-gt', 'if-le']
             op = ops[opcode - 0x32]
         B = int(insns[offset + 2: offset + 3], 16)
         A = int(insns[offset + 3: offset + 4], 16)
-        CCCC = insns[offset+4:offset+8].decode('hex')[::-1].encode('hex')
+        CCCC = codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                             'hex_codec')
 
         decodedInstruction.op = op
         decodedInstruction.vA = A
         decodedInstruction.vB = B
         decodedInstruction.vC = CCCC
-        decodedInstruction.smaliCode = '%s v%d, v%d, %s // +%s' % (op, A, B, hex(offset/4+int(CCCC, 16)), CCCC)
+        decodedInstruction.smaliCode = '%s v%d, v%d, %s // +%s' % (op, A, B, hex(offset / 4 + int(CCCC, 16)), CCCC)
         decodedInstruction.offset = offset
         decodedInstruction.length = 8
 
@@ -570,12 +597,14 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         op = '????'
         # (1) opcode=d0..d7 binop/lit16 vA, vB, #+CCCC
         if opcode >= 0xd0 and opcode <= 0xd7:
-            ops = ['add-int/lit16', 'rsub-int', 'mul-int/lit16', 'div-int/lit16', 'rem-int/lit16', 'and-int/lit16', 'or-int/lit16', 'xor-int/lit16']
+            ops = ['add-int/lit16', 'rsub-int', 'mul-int/lit16', 'div-int/lit16', 'rem-int/lit16', 'and-int/lit16',
+                   'or-int/lit16', 'xor-int/lit16']
             op = ops[opcode - 0xd0]
 
         B = int(insns[offset + 2: offset + 3], 16)
         A = int(insns[offset + 3: offset + 4], 16)
-        CCCC = insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex')
+        CCCC = codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                             'hex_codec')
 
         decodedInstruction.op = op
         decodedInstruction.vA = A
@@ -593,7 +622,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
 
         B = int(insns[offset + 2:offset + 3], 16)
         A = int(insns[offset + 3:offset + 4], 16)
-        CCCC = insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex')
+        CCCC = codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                             'hex_codec')
 
         # (1) opcode=20 instance-of vA, vB, type@CCCC
         if opcode == 0x20:
@@ -631,12 +661,14 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         # Format: ØØ|op AAAAlo AAAAhi <=> op +AAAAAAAA
         # (1) opcode=2a goto/32 +AAAAAAAA
         if opcode == 0x2a:
-            AAAAAAAA = insns[offset + 2:offset + 12].decode('hex')[::-1].encode('hex')
-            buma = word_to_buma(int(insns[offset + 4:offset + 12].decode('hex')[::-1].encode('hex'), 16))
+            AAAAAAAA = codecs.encode(codecs.decode(insns[offset + 2:offset + 12], 'hex_codec')[::-1],
+                          'hex_codec')
+            buma = word_to_buma(int(codecs.encode(codecs.decode(insns[offset + 4:offset + 12], 'hex_codec')[::-1],
+                          'hex_codec'), 16))
 
             decodedInstruction.op = 'goto/32'
             decodedInstruction.vA = int(AAAAAAAA, 16)
-            decodedInstruction.smaliCode = 'goto/32 %s //%s' % (hex(offset/4+buma), hex(buma))
+            decodedInstruction.smaliCode = 'goto/32 %s //%s' % (hex(offset / 4 + buma), hex(buma))
             decodedInstruction.offset = offset
             decodedInstruction.length = 12
 
@@ -652,8 +684,11 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             op = 'move-wide/16'
         if opcode == 0x09:
             op = 'move-object/16'
-        AAAA = insns[offset + 2:offset + 6].decode('hex')[::-1].encode('hex')
-        BBBB = insns[offset + 6:offset + 10].decode('hex')[::-1].encode('hex')
+
+        AAAA = codecs.encode(codecs.decode(insns[offset + 2:offset + 6], 'hex_codec')[::-1],
+                      'hex_codec')
+        BBBB = codecs.encode(codecs.decode(insns[offset + 6:offset + 10], 'hex_codec')[::-1],
+                      'hex_codec')
 
         decodedInstruction.op = op
         decodedInstruction.vA = int(AAAA, 16)
@@ -673,7 +708,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             op = 'const-wide/32'
 
         AA = int(insns[offset + 2:offset + 4], 16)
-        BBBBBBBB = insns[offset + 4:offset + 12].decode('hex')[::-1].encode('hex')
+        BBBBBBBB = codecs.encode(codecs.decode(insns[offset + 4:offset + 12], 'hex_codec')[::-1],
+                      'hex_codec')
 
         decodedInstruction.op = op
         decodedInstruction.vA = AA
@@ -696,14 +732,16 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             op = 'sparse-switch'
 
         AA = int(insns[offset + 2:offset + 4], 16)
-        BBBBBBBB = insns[offset + 4:offset + 12].decode('hex')[::-1].encode('hex')
+        BBBBBBBB = codecs.encode(codecs.decode(insns[offset + 4:offset + 12], 'hex_codec')[::-1],
+                      'hex_codec')
         pseudo_instructions_offset = int(BBBBBBBB, 16) + byteCounts
         retVal = parsePseudoInstruction(byteCounts, insns, pseudo_instructions_offset * 4)
 
         decodedInstruction.op = op
         decodedInstruction.vA = AA
         decodedInstruction.vB = int(BBBBBBBB, 16)
-        decodedInstruction.smaliCode = '%s v%d, %08x // +%s, %s' % (op, AA, pseudo_instructions_offset, BBBBBBBB, retVal)
+        decodedInstruction.smaliCode = '%s v%d, %08x // +%s, %s' % (
+            op, AA, pseudo_instructions_offset, BBBBBBBB, retVal)
         decodedInstruction.offset = offset
         decodedInstruction.length = 12
 
@@ -713,7 +751,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         indexStr = ''
 
         AA = int(insns[offset + 2:offset + 4], 16)
-        BBBBBBBB = insns[offset + 4:offset + 12].decode('hex')[::-1].encode('hex')
+        BBBBBBBB = codecs.encode(codecs.decode(insns[offset + 4:offset + 12], 'hex_codec')[::-1],
+                      'hex_codec')
 
         # (1) opcode=1b const-string/jumbo vAA, string@BBBBBBBB
         if opcode == 0x1b:
@@ -735,9 +774,11 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
 
         A = int(insns[offset + 2:offset + 3], 16)
         G = int(insns[offset + 3:offset + 4], 16)
-        BBBB = insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex')
+        BBBB = codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                             'hex_codec')
 
-        registerStr = insns[offset + 8:offset + 12].decode('hex')[::-1].encode('hex')
+        registerStr = codecs.encode(codecs.decode(insns[offset + 8:offset + 12], 'hex_codec')[::-1],
+                      'hex_codec')
         F = int(registerStr[:1], 16)
         E = int(registerStr[1:2], 16)
         D = int(registerStr[2:3], 16)
@@ -751,7 +792,7 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         # (2) opcode=62..72 invoke-kind {vC, vD, vE, vF, vG}, method@BBBB
         if opcode >= 0x6e and opcode <= 0x72:
             invoke_kind = ['invoke-virtual', 'invoke-super', 'invoke-direct', 'invoke-static', 'invoke-interface']
-            op = invoke_kind[opcode-0x6e]
+            op = invoke_kind[opcode - 0x6e]
             indexType = 'method'
             dexMethodIdObj = dexFile.DexMethodIdList[int(BBBB, 16)]
             indexStr = dexMethodIdObj.toString(dexFile)
@@ -809,7 +850,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             decodedInstruction.vE = E
             decodedInstruction.vF = F
             decodedInstruction.indexType = indexType
-            decodedInstruction.smaliCode = '%s {v%d, v%d, v%d, v%d}, %s@%s //%s' % (op, C, D, E, F, indexType, BBBB, indexStr)
+            decodedInstruction.smaliCode = '%s {v%d, v%d, v%d, v%d}, %s@%s //%s' % (
+                op, C, D, E, F, indexType, BBBB, indexStr)
             decodedInstruction.offset = offset
             decodedInstruction.length = 12
 
@@ -823,7 +865,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             decodedInstruction.vF = F
             decodedInstruction.vG = G
             decodedInstruction.indexType = indexType
-            decodedInstruction.smaliCode = '%s {v%d, v%d, v%d, v%d, %d}, %s@%s //%s' % (op, C, D, E, F, G, indexType, BBBB, indexStr)
+            decodedInstruction.smaliCode = '%s {v%d, v%d, v%d, v%d, %d}, %s@%s //%s' % (
+                op, C, D, E, F, G, indexType, BBBB, indexStr)
             decodedInstruction.offset = offset
             decodedInstruction.length = 12
 
@@ -844,8 +887,11 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         indexStr = ''
 
         AA = int(insns[offset + 2:offset + 4], 16)
-        BBBB = insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex')
-        CCCC = int(insns[offset + 8:offset + 12].decode('hex')[::-1].encode('hex'), 16)
+        BBBB = codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                             'hex_codec')
+
+        CCCC = int(codecs.encode(codecs.decode(insns[offset + 8:offset + 12], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
         N = AA + CCCC - 1
 
         # (1) opcode=25 filled-new-array/range {vCCCC .. vNNNN}, type@BBBB
@@ -855,7 +901,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             indexStr = dexFile.DexTypeIdList[int(BBBB, 16)]
         # (2) opcode=74..78 invoke-kind/range {vCCCC .. vNNNN}, method@BBBB
         if opcode >= 0x74 and opcode <= 0x78:
-            ops = ['invoke-virtual/range', 'invoke-super/range', 'invoke-direct/range', 'invoke-static/range', 'invoke-intenrface/range']
+            ops = ['invoke-virtual/range', 'invoke-super/range', 'invoke-direct/range', 'invoke-static/range',
+                   'invoke-intenrface/range']
             op = ops[opcode - 0x74]
             indexType = 'method'
             dexMethodIdObj = dexFile.DexMethodIdList[int(BBBB, 16)]
@@ -886,8 +933,9 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         # Format: AA|op BBBBlo BBBB BBBB BBBBhi <=>op vAA,#+BBBBBBBBBBBBBBBB
         # (1) opcode=18 const-wide vAA, #+BBBBBBBBBBBBBBBB
         if opcode == 0x18:
-            AA = int(insns[offset+2:offset+4], 16)
-            BBBBBBBBBBBBBBBB = insns[offset+4:offset+20].decode('hex')[::-1].encode('hex')
+            AA = int(insns[offset + 2:offset + 4], 16)
+            BBBBBBBBBBBBBBBB = codecs.encode(codecs.decode(insns[offset + 4:offset + 20], 'hex_codec')[::-1],
+                      'hex_codec')
 
             decodedInstruction.op = 'const-wide'
             decodedInstruction.vA = AA
@@ -915,11 +963,13 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
     opcode为ff，表示后面还有二级opcode
     '''
     if opcode == 0xff:
-        expanded_opcode = int(insns[offset:offset + 4].decode('hex')[::-1].encode('hex'), 16)
+        expanded_opcode = int(codecs.encode(codecs.decode(insns[offset:offset + 4], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
         formatIns, _ = getOpCode(expanded_opcode)
 
     if formatIns == '41c':
-        expanded_opcode = int(insns[offset:offset + 4].decode('hex')[::-1].encode('hex'), 16)
+        expanded_opcode = int(codecs.encode(codecs.decode(insns[offset:offset + 4], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
         # Format: exop BBBBlo BBBBhi AAAA <=> exop vAAAA, [field|type]@BBBBBBBB
         indexType = '????'
         op = '????'
@@ -943,8 +993,10 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             op = ops[expanded_opcode - 0x14ff]
             indexType = 'field'
 
-        BBBBBBBB = int(insns[offset + 4:offset + 12].decode('hex')[::-1].encode('hex'), 16)
-        AAAA = int(insns[offset + 12:offset + 16].decode('hex')[::-1].encode('hex'), 16)
+        BBBBBBBB = int(codecs.encode(codecs.decode(insns[offset + 4:offset + 12], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
+        AAAA = int(codecs.encode(codecs.decode(insns[offset + 12:offset + 16], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
 
         decodedInstruction.op = op
         decodedInstruction.vA = AAAA
@@ -955,7 +1007,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         decodedInstruction.length = 16
 
     elif formatIns == '52c':
-        expanded_opcode = int(insns[offset:offset + 4].decode('hex')[::-1].encode('hex'), 16)
+        expanded_opcode = int(codecs.encode(codecs.decode(insns[offset:offset + 4], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
         indexType = '????'
         op = '????'
         # Format: exop CCCClo CCCChi AAAA BBBB <=> exop vAAAA, vBBBB, [field|type]@CCCCCCCC
@@ -974,9 +1027,12 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
                    'iput-boolean/jumbo', 'iput-byte/jumbo', 'iput-char/jumbo', 'iput-short/jumbo']
             op = ops[expanded_opcode - 0x06ff]
             indexType = 'field'
-        CCCCCCCC = int(insns[offset + 4:offset + 12].decode('hex')[::-1].encode('hex'), 16)
-        AAAA = int(insns[offset + 12:offset + 16].decode('hex')[::-1].encode('hex'), 16)
-        BBBB = int(insns[offset + 16:offset + 20].decode('hex')[::-1].encode('hex'), 16)
+        CCCCCCCC = int(codecs.encode(codecs.decode(insns[offset + 4:offset + 12], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
+        AAAA = int(codecs.encode(codecs.decode(insns[offset + 12:offset + 16], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
+        BBBB = int(codecs.encode(codecs.decode(insns[offset + 16:offset + 20], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
 
         decodedInstruction.op = op
         decodedInstruction.vA = AAAA
@@ -988,7 +1044,8 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
         decodedInstruction.length = 20
 
     elif formatIns == '5rc':
-        expanded_opcode = int(insns[offset:offset + 4].decode('hex')[::-1].encode('hex'), 16)
+        expanded_opcode = int(codecs.encode(codecs.decode(insns[offset:offset + 4], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
         indexType = '????'
         op = '????'
         # Format: exop BBBBlo BBBBhi AAAA CCCC <=> exop {vCCCC .. vNNNN}, [method|type]@BBBBBBBB
@@ -998,13 +1055,17 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
             indexType = 'type'
         # (2) expanded_opcode=22ff..26ff invoke-kind/jumbo {vCCCC .. vNNNN}, method@BBBBBBBB
         if expanded_opcode >= 0x22ff and expanded_opcode <= 0x26ff:
-            ops= ['invoke-virtual/jumbo', 'invoke-super/jumbo', 'invoke-direct/jumbo',
-                  'invoke-static/jumbo', 'invoke-interface/jumbo']
+            ops = ['invoke-virtual/jumbo', 'invoke-super/jumbo', 'invoke-direct/jumbo',
+                   'invoke-static/jumbo', 'invoke-interface/jumbo']
             op = ops[expanded_opcode - 0x22ff]
             indexType = 'method'
-        BBBBBBBB = int(insns[offset + 4:offset + 12].decode('hex')[::-1].encode('hex'), 16)
-        AAAA = int(insns[offset + 12:offset + 16].decode('hex')[::-1].encode('hex'), 16)
-        CCCC = int(insns[offset + 16:offset + 20].decode('hex')[::-1].encode('hex'), 16)
+        BBBBBBBB = int(codecs.encode(codecs.decode(insns[offset + 4:offset + 12], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
+        
+        AAAA = int(codecs.encode(codecs.decode(insns[offset + 12:offset + 16], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
+        CCCC = int(codecs.encode(codecs.decode(insns[offset + 16:offset + 20], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
         N = AAAA + CCCC - 1
 
         registers = ''
@@ -1022,32 +1083,41 @@ def dexDecodeInstruction(dexFile, dexCode, offset):
 
     return decodedInstruction
 
+
 def parsePseudoInstruction(opcode_address, insns, offset):
-    ident = insns[offset:offset+4].decode('hex')[::-1].encode('hex')
+    ident = codecs.encode(codecs.decode(insns[offset:offset + 4], 'hex_codec')[::-1],
+                      'hex_codec')
     # packed-switch-payload Format
     if ident == '0100':
-        size = int(insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex'), 16)
-        first_key = int(insns[offset+8:offset+16].decode('hex')[::-1].encode('hex'), 16)
+        size = int(codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                                 'hex_codec'), 16)
+        first_key = int(codecs.encode(codecs.decode(insns[offset + 8:offset + 16], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
         targets = []
         sb = ''
         for i in range(size):
-            _v = int(insns[offset+16+8*i:offset+16+8*(i+1)].decode('hex')[::-1].encode('hex'), 16)
+            _v = int(codecs.encode(codecs.decode(insns[offset + 16 + 8 * i:offset + 16 + 8 * (i + 1)], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
             targets.append(_v)
-            sb += '    \t%-16scase %d: goto %s\n' % ('', first_key+i, hex(_v + opcode_address))
-        return '\n'+sb
+            sb += '    \t%-16scase %d: goto %s\n' % ('', first_key + i, hex(_v + opcode_address))
+        return '\n' + sb
     # sparse-switch-payload Format
     if ident == '0200':
-        size = int(insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex'), 16)
+        size = int(codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                                 'hex_codec'), 16)
         keys = []
         targets = []
         sb = ''
         for i in range(size):
-            keys.append(int(insns[offset+8+8*i:offset+8+8*(i+1)].decode('hex')[::-1].encode('hex'), 16))
-            _v = int(insns[(offset+8+8*i)+size*8:(offset+8+8*(i+1))+size*8].decode('hex')[::-1].encode('hex'), 16)
+            keys.append(int(codecs.encode(codecs.decode(insns[offset + 8 + 8 * i:offset + 8 + 8 * (i + 1)], 'hex_codec')[::-1],
+                      'hex_codec'), 16))
+            _v = int(
+                insns[(offset + 8 + 8 * i) + size * 8:(offset + 8 + 8 * (i + 1)) + size * 8].decode('hex')[::-1].encode(
+                    'hex'), 16)
 
             hexNum = _v + opcode_address
-            if hexNum > (0xffffffff+1):
-                hexNum -= 0xffffffff+1
+            if hexNum > (0xffffffff + 1):
+                hexNum -= 0xffffffff + 1
                 tmp = hex(hexNum)
                 if tmp.endswith('L'):
                     tmp = tmp[:-1]
@@ -1055,16 +1125,18 @@ def parsePseudoInstruction(opcode_address, insns, offset):
             else:
                 targets.append(hex(hexNum))
             sb += '    \t%-16scase %d: goto %s\n' % ('', keys[i], targets[i])
-        return '\n'+sb
+        return '\n' + sb
     # fill-array-data-payload Format
     if ident == '0300':
-        element_width = int(insns[offset + 4:offset + 8].decode('hex')[::-1].encode('hex'), 16)
-        size = int(insns[offset + 8:offset + 16].decode('hex')[::-1].encode('hex'), 16)
+        element_width = int(codecs.encode(codecs.decode(insns[offset + 4:offset + 8], 'hex_codec')[::-1],
+                                          'hex_codec'), 16)
+        size = int(codecs.encode(codecs.decode(insns[offset + 8:offset + 16], 'hex_codec')[::-1],
+                      'hex_codec'), 16)
         data = []
 
         dataStr = '['
         for i in range(size):
-            val = insns[offset + 16 + 2*element_width*i:offset + 16 + 2*element_width*(i+1)]
+            val = insns[offset + 16 + 2 * element_width * i:offset + 16 + 2 * element_width * (i + 1)]
             data.append(val)
             dataStr += val + ','
         dataStr += ']'
@@ -1072,29 +1144,30 @@ def parsePseudoInstruction(opcode_address, insns, offset):
 
 
 MAP_ITEM_TYPE_CODES = {
-    0x0000 : "kDexTypeHeaderItem",
-    0x0001 : "kDexTypeStringIdItem",
-    0x0002 : "kDexTypeTypeIdItem",
-    0x0003 : "kDexTypeProtoIdItem",
-    0x0004 : "kDexTypeFieldIdItem",
-    0x0005 : "kDexTypeMethodIdItem",
-    0x0006 : "kDexTypeClassDefItem",
-    0x1000 : "kDexTypeMapList",
-    0x1001 : "kDexTypeTypeList",
-    0x1002 : "kDexTypeAnnotationSetRefList",
-    0x1003 : "kDexTypeAnnotationSetItem",
-    0x2000 : "kDexTypeClassDataItem",
-    0x2001 : "kDexTypeCodeItem",
-    0x2002 : "kDexTypeStringDataItem",
-    0x2003 : "kDexTypeDebugInfoItem",
-    0x2004 : "kDexTypeAnnotationItem",
-    0x2005 : "kDexTypeEncodedArrayItem",
-    0x2006 : "kDexTypeAnnotationsDirectoryItem",
+    0x0000: "kDexTypeHeaderItem",
+    0x0001: "kDexTypeStringIdItem",
+    0x0002: "kDexTypeTypeIdItem",
+    0x0003: "kDexTypeProtoIdItem",
+    0x0004: "kDexTypeFieldIdItem",
+    0x0005: "kDexTypeMethodIdItem",
+    0x0006: "kDexTypeClassDefItem",
+    0x1000: "kDexTypeMapList",
+    0x1001: "kDexTypeTypeList",
+    0x1002: "kDexTypeAnnotationSetRefList",
+    0x1003: "kDexTypeAnnotationSetItem",
+    0x2000: "kDexTypeClassDataItem",
+    0x2001: "kDexTypeCodeItem",
+    0x2002: "kDexTypeStringDataItem",
+    0x2003: "kDexTypeDebugInfoItem",
+    0x2004: "kDexTypeAnnotationItem",
+    0x2005: "kDexTypeEncodedArrayItem",
+    0x2006: "kDexTypeAnnotationsDirectoryItem",
 }
 
 
 class DexFile(object):
     """docstring for DexFile"""
+
     def __init__(self, filepath):
         super(DexFile, self).__init__()
         self.filepath = filepath
@@ -1113,14 +1186,13 @@ class DexFile(object):
         # 类定义区
         self.dexClassDefList = []
 
-        self.init_header(self.filepath) # 初始化dex header
-        self.init_DexStringId() # 初始化 DexStringId index table
-        self.init_DexTypeId() # 初始化DexTypeId index table
-        self.init_DexProtoId() # 初始化DexProtoId index table
-        self.int_DexFieldId() # 初始化DexFieldId index table
-        self.init_DexMethodId() # 初始化DexMethodId index table
-        self.init_DexClassDef() # 初始化DexClassDef类定义区
-
+        self.init_header(self.filepath)  # 初始化dex header
+        self.init_DexStringId()  # 初始化 DexStringId index table
+        self.init_DexTypeId()  # 初始化DexTypeId index table
+        self.init_DexProtoId()  # 初始化DexProtoId index table
+        self.int_DexFieldId()  # 初始化DexFieldId index table
+        self.init_DexMethodId()  # 初始化DexMethodId index table
+        self.init_DexClassDef()  # 初始化DexClassDef类定义区
 
     def init_header(self, filepath):
         f = open(filepath, "rb")
@@ -1130,95 +1202,115 @@ class DexFile(object):
         self.DexHeader.magic = binascii.b2a_hex(f.read(8))
 
         f.seek(0x8, 0)
-        self.DexHeader.checksum = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
-
+        self.DexHeader.checksum = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                'hex_codec')
         f.seek(0xc, 0)
         self.DexHeader.signature = binascii.b2a_hex(f.read(20))
 
         f.seek(0x20, 0)
-        self.DexHeader.file_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.file_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                 'hex_codec')
 
         f.seek(0x24, 0)
-        self.DexHeader.header_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.header_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                   'hex_codec')
 
         f.seek(0x28, 0)
-        self.DexHeader.endian_tag = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.endian_tag = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                  'hex_codec')
 
         f.seek(0x2c, 0)
-        self.DexHeader.link_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.link_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                 'hex_codec')
 
         f.seek(0x30, 0)
-        self.DexHeader.link_off = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.link_off = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                'hex_codec')
 
         f.seek(0x34, 0)
-        self.DexHeader.map_off = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.map_off = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                               'hex_codec')
 
         f.seek(0x38, 0)
-        self.DexHeader.string_ids_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.string_ids_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                       'hex_codec')
 
         f.seek(0x3c, 0)
-        self.DexHeader.string_ids_off = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.string_ids_off = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                      'hex_codec')
 
         f.seek(0x40, 0)
-        self.DexHeader.type_ids_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.type_ids_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                     'hex_codec')
 
         f.seek(0x44, 0)
-        self.DexHeader.type_ids_off = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.type_ids_off = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                    'hex_codec')
 
         f.seek(0x48, 0)
-        self.DexHeader.proto_ids_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.proto_ids_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                      'hex_codec')
 
         f.seek(0x4c, 0)
-        self.DexHeader.proto_ids_off = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.proto_ids_off = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                     'hex_codec')
 
         f.seek(0x50, 0)
-        self.DexHeader.field_ids_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.field_ids_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                      'hex_codec')
 
         f.seek(0x54, 0)
-        self.DexHeader.field_ids_off = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.field_ids_off = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                     'hex_codec')
 
         f.seek(0x58, 0)
-        self.DexHeader.method_ids_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.method_ids_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                       'hex_codec')
 
         f.seek(0x5c, 0)
-        self.DexHeader.method_ids_off = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.method_ids_off = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                      'hex_codec')
 
         f.seek(0x60, 0)
-        self.DexHeader.class_defs_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.class_defs_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                       'hex_codec')
 
         f.seek(0x64, 0)
-        self.DexHeader.class_defs_off = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.class_defs_off = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                      'hex_codec')
 
         f.seek(0x68, 0)
-        self.DexHeader.data_size = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.data_size = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                 'hex_codec')
 
         f.seek(0x6c, 0)
-        self.DexHeader.data_off = binascii.b2a_hex(f.read(4)).decode('hex')[::-1].encode('hex')
+        self.DexHeader.data_off = codecs.encode(codecs.decode(binascii.b2a_hex(f.read(4)), 'hex_codec')[::-1],
+                                                'hex_codec')
 
     def print_header(self):
-        print '[+] magic:\t0x' + self.DexHeader.magic
-        print '[+] checksum:\t0x' + self.DexHeader.checksum
-        print '[+] signature:\t' + self.DexHeader.signature
-        print '[+] file_size:\t0x' + self.DexHeader.file_size
-        print '[+] header_size:\t0x' + self.DexHeader.header_size
-        print '[+] endian_tag:\t0x' + self.DexHeader.endian_tag
-        print '[+] link_size:\t0x' + self.DexHeader.link_size
-        print '[+] link_off:\t0x' + self.DexHeader.link_off
-        print '[+] map_off:\t0x' + self.DexHeader.map_off
-        print '[+] string_ids_size:\t0x' + self.DexHeader.string_ids_size
-        print '[+] string_ids_off:\t0x' + self.DexHeader.string_ids_off
-        print '[+] type_ids_size:\t0x' + self.DexHeader.type_ids_size
-        print '[+] type_ids_off:\t0x' + self.DexHeader.type_ids_off
-        print '[+] proto_ids_size:\t0x' + self.DexHeader.proto_ids_size
-        print '[+] proto_ids_off:\t0x' + self.DexHeader.proto_ids_off
-        print '[+] field_ids_size:\t0x' + self.DexHeader.field_ids_size
-        print '[+] field_ids_off:\t0x' + self.DexHeader.field_ids_off
-        print '[+] method_ids_size:\t0x' + self.DexHeader.method_ids_size
-        print '[+] method_ids_off:\t0x' + self.DexHeader.method_ids_off
-        print '[+] class_defs_size:\t0x' + self.DexHeader.class_defs_size
-        print '[+] class_defs_off:\t0x' + self.DexHeader.class_defs_off
-        print '[+] data_size:\t0x' + self.DexHeader.data_size
-        print '[+] data_off:\t0x' + self.DexHeader.data_off
+        print('[+] magic:\t0x' + self.DexHeader.magic)
+        print('[+] checksum:\t0x' + self.DexHeader.checksum)
+        print('[+] signature:\t' + self.DexHeader.signature)
+        print('[+] file_size:\t0x' + self.DexHeader.file_size)
+        print('[+] header_size:\t0x' + self.DexHeader.header_size)
+        print('[+] endian_tag:\t0x' + self.DexHeader.endian_tag)
+        print('[+] link_size:\t0x' + self.DexHeader.link_size)
+        print('[+] link_off:\t0x' + self.DexHeader.link_off)
+        print('[+] map_off:\t0x' + self.DexHeader.map_off)
+        print('[+] string_ids_size:\t0x' + self.DexHeader.string_ids_size)
+        print('[+] string_ids_off:\t0x' + self.DexHeader.string_ids_off)
+        print('[+] type_ids_size:\t0x' + self.DexHeader.type_ids_size)
+        print('[+] type_ids_off:\t0x' + self.DexHeader.type_ids_off)
+        print('[+] proto_ids_size:\t0x' + self.DexHeader.proto_ids_size)
+        print('[+] proto_ids_off:\t0x' + self.DexHeader.proto_ids_off)
+        print('[+] field_ids_size:\t0x' + self.DexHeader.field_ids_size)
+        print('[+] field_ids_off:\t0x' + self.DexHeader.field_ids_off)
+        print('[+] method_ids_size:\t0x' + self.DexHeader.method_ids_size)
+        print('[+] method_ids_off:\t0x' + self.DexHeader.method_ids_off)
+        print('[+] class_defs_size:\t0x' + self.DexHeader.class_defs_size)
+        print('[+] class_defs_off:\t0x' + self.DexHeader.class_defs_off)
+        print('[+] data_size:\t0x' + self.DexHeader.data_size)
+        print('[+] data_off:\t0x' + self.DexHeader.data_off)
 
     def print_DexMapList(self):
         """
@@ -1229,14 +1321,15 @@ class DexFile(object):
         """
         map_off_int = int(self.DexHeader.map_off, 16)
 
-        #u4 size
+        # u4 size
         self.DexHeader.f.seek(map_off_int, 0)
-        size_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+        size_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
         size = int(size_hex, 16)
 
         for index in range(size):
             # DexMapItem list[]
-            self.print_DexMapItem(map_off_int+4, index)
+            self.print_DexMapItem(map_off_int + 4, index)
 
     def print_DexMapItem(self, map_off, index):
         """
@@ -1247,28 +1340,32 @@ class DexFile(object):
             u4  offset;            /* file offset to the start of data */
         } DexMapItem;
         """
-        #u2 type
-        self.DexHeader.f.seek(map_off + index*12, 0)
-        dexType = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+        # u2 type
+        self.DexHeader.f.seek(map_off + index * 12, 0)
+        dexType = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
 
-        #u2 unused
-        self.DexHeader.f.seek(map_off + index*12 + 2, 0)
-        unused = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+        # u2 unused
+        self.DexHeader.f.seek(map_off + index * 12 + 2, 0)
+        unused = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
 
-        #u4 size
-        self.DexHeader.f.seek(map_off + index*12 + 4, 0)
-        size = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+        # u4 size
+        self.DexHeader.f.seek(map_off + index * 12 + 4, 0)
+        size = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
 
-        #u4 offset
-        self.DexHeader.f.seek(map_off + index*12 + 8, 0)
-        offset = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+        # u4 offset
+        self.DexHeader.f.seek(map_off + index * 12 + 8, 0)
+        offset = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
 
-        print '\n'
-        print '[+] #%d DexMapItem:\t' % index
-        print '    u2 dexType\t%s #%s' % (dexType, MAP_ITEM_TYPE_CODES[int(dexType, 16)])
-        print '    u2 unused\t' + unused
-        print '    u4 size\t' + size
-        print '    u4 offset\t' + offset
+        print('\n')
+        print('[+] #%d DexMapItem:\t' % index)
+        print('    u2 dexType\t%s #%s' % (dexType, MAP_ITEM_TYPE_CODES[int(dexType, 16)]))
+        print('    u2 unused\t' + unused)
+        print('    u4 size\t' + size)
+        print('    u4 offset\t' + offset)
 
     def init_DexStringId(self):
         """
@@ -1281,11 +1378,13 @@ class DexFile(object):
 
         for index in range(string_ids_size_int):
             # string offset
-            self.DexHeader.f.seek(string_ids_off_int + index*4, 0)
+            self.DexHeader.f.seek(string_ids_off_int + index * 4, 0)
             try:
-                string_data_off = int(binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex'), 16)
+                string_data_off = int(codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec'), 16)
             except:
-                print binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+                print(codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec'))
             self.DexHeader.f.seek(string_data_off, 0)
 
             # length of str
@@ -1293,24 +1392,26 @@ class DexFile(object):
 
             length = 0
             try:
-                while int(binascii.b2a_hex(self.DexHeader.f.read(1)).decode('hex')[::-1].encode('hex'),16) != 0:
+                while int(codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(1)), 'hex_codec')[::-1],
+                      'hex_codec'), 16) != 0:
                     length += 1
             except:
-                print binascii.b2a_hex(self.DexHeader.f.read(1)).decode('hex')[::-1].encode('hex')
-            self.DexHeader.f.seek(string_data_off + 1,0)
+                print(codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(1)), 'hex_codec')[::-1],
+                      'hex_codec'))
+            self.DexHeader.f.seek(string_data_off + 1, 0)
             dex_str = self.DexHeader.f.read(length)
-            self.DexHeader.f.read(1) # remove \x00
-            string_data_off += (length + 2) # + \0 + size bit
+            self.DexHeader.f.read(1)  # remove \x00
+            string_data_off += (length + 2)  # + \0 + size bit
 
             # self.DexStringIdList.append(dex_str.decode('utf-8'))
             self.DexStringIdList.append(dex_str)
 
     def print_DexStringId(self):
 
-        print '\n'
-        print '[+] DexStringId:'
+        print('\n')
+        print('[+] DexStringId:')
         for index in range(len(self.DexStringIdList)):
-            print '    #%s %s' % (hex(index), self.DexStringIdList[index])
+            print('    #%s %s' % (hex(index), self.DexStringIdList[index]))
 
     def init_DexTypeId(self):
         type_ids_off_int = int(self.DexHeader.type_ids_off, 16)
@@ -1319,32 +1420,36 @@ class DexFile(object):
         self.DexHeader.f.seek(type_ids_off_int, 0)
 
         for index in range(type_ids_size_int):
-            descriptorIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            descriptorIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             descriptorIdx_int = int(descriptorIdx_hex, 16)
 
             self.DexTypeIdList.append(descriptorIdx_int)
 
     def print_DexTypeId(self):
-        print '\n'
-        print '[+] DexTypeId:'
+        print('\n')
+        print('[+] DexTypeId:')
         for index in range(len(self.DexTypeIdList)):
-            print '    #%s #%s' % (hex(index), self.getDexTypeId(index))
+            print('    #%s #%s' % (hex(index), self.getDexTypeId(index)))
 
     def init_DexProtoId(self):
         proto_ids_size_int = int(self.DexHeader.proto_ids_size, 16)
         proto_ids_off_int = int(self.DexHeader.proto_ids_off, 16)
 
         for index in range(proto_ids_size_int):
-            self.DexHeader.f.seek(proto_ids_off_int+index*12, 0)
+            self.DexHeader.f.seek(proto_ids_off_int + index * 12, 0)
             dexProtoIdObj = DexProtoId()
             # u4 shortyIdx
-            shortyIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            shortyIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             shortyIdx = int(shortyIdx_hex, 16)
             # u4 returnTypeIdx
-            returnTypeIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            returnTypeIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             returnTypeIdx = int(returnTypeIdx_hex, 16)
             # u4 parametersOff
-            parametersOff_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            parametersOff_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             parametersOff = int(parametersOff_hex, 16)
 
             dexProtoIdObj.shortyIdx = shortyIdx
@@ -1363,7 +1468,8 @@ class DexFile(object):
             parameter_str = ""
             # Struct DexTypeList
             # u4 size
-            dexTypeItemSize_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            dexTypeItemSize_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             dexTypeItemSize = int(dexTypeItemSize_hex, 16)
 
             dexTypeListObj = DexTypeList()
@@ -1373,7 +1479,8 @@ class DexFile(object):
             for i in range(dexTypeItemSize):
                 # Struct DexTypeItem
                 # u2 typeIdx
-                typeIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+                typeIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
                 typeIdx = int(typeIdx_hex, 16)
                 dexTypeListObj.list.append(typeIdx)
 
@@ -1389,23 +1496,27 @@ class DexFile(object):
     def print_DexProtoId(self):
         proto_ids_off_int = int(self.DexHeader.proto_ids_off, 16)
         self.DexHeader.f.seek(proto_ids_off_int, 0)
-        print '\n'
-        print '[+] DexProtoId:'
+        print('\n')
+        print('[+] DexProtoId:')
         for index in range(len(self.DexProtoIdList)):
             dexProtoidObj = self.DexProtoIdList[index]
 
             shortyIdxStr = self.getDexStringId(dexProtoidObj.shortyIdx)
             returnTypeIdxStr = self.getDexStringId(dexProtoidObj.returnTypeIdx)
 
-            print '    #%s (%s~%s)' % (hex(index), hex(dexProtoidObj.offset), hex(dexProtoidObj.offset + dexProtoidObj.length))
-            print '    DexProtoId[%d]->shortyIdx= %s\t#%s' % (index,hex(dexProtoidObj.shortyIdx), shortyIdxStr)
-            print '    DexProtoId[%d]->returnTypeIdx= %s\t#%s' % (index, hex(dexProtoidObj.returnTypeIdx), returnTypeIdxStr)
-            print '    DexProtoId[%d]->parametersOff= %s' % (index, hex(dexProtoidObj.parameterOff))
+            print('    #%s (%s~%s)' % (
+                hex(index), hex(dexProtoidObj.offset), hex(dexProtoidObj.offset + dexProtoidObj.length)))
+            print('    DexProtoId[%d]->shortyIdx= %s\t#%s' % (index, hex(dexProtoidObj.shortyIdx), shortyIdxStr))
+            print('    DexProtoId[%d]->returnTypeIdx= %s\t#%s' % (
+                index, hex(dexProtoidObj.returnTypeIdx), returnTypeIdxStr))
+            print('    DexProtoId[%d]->parametersOff= %s' % (index, hex(dexProtoidObj.parameterOff)))
             if dexProtoidObj.dexTypeList:
-                print '      DexTypeList->size= %s' % hex(dexProtoidObj.dexTypeList.size)
+                print('      DexTypeList->size= %s' % hex(dexProtoidObj.dexTypeList.size))
                 for k in range(dexProtoidObj.dexTypeList.size):
-                    print '      DexTypeList->list[%d]= %s\t#%s' % (k, hex(dexProtoidObj.dexTypeList.list[k]), self.getDexTypeId(dexProtoidObj.dexTypeList.list[k]))
-            print ''
+                    print('      DexTypeList->list[%d]= %s\t#%s' % (
+                        k, hex(dexProtoidObj.dexTypeList.list[k]),
+                        self.getDexTypeId(dexProtoidObj.dexTypeList.list[k])))
+            print('')
 
     def int_DexFieldId(self):
         field_ids_off = int(self.DexHeader.field_ids_off, 16)
@@ -1417,13 +1528,16 @@ class DexFile(object):
             # DexFieldId
             dexFieldIdObj = DexFieldId()
             # u2 classIdx
-            classIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+            classIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
             classIdx = int(classIdx_hex, 16)
             # u2 typeIdx
-            typeIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+            typeIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
             typeIdx = int(typeIdx_hex, 16)
             # u4 nameIdx
-            nameIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            nameIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             nameIdx = int(nameIdx_hex, 16)
 
             dexFieldIdObj.classIdx = classIdx
@@ -1435,7 +1549,7 @@ class DexFile(object):
             self.DexFieldIdList.append(dexFieldIdObj)
 
     def print_DexFieldId(self):
-        print '[+] DexFieldId:'
+        print('[+] DexFieldId:')
         for index in range(len(self.DexFieldIdList)):
             self.DexHeader.f.seek(self.DexFieldIdList[index].offset, 0)
             # DexFieldId
@@ -1446,11 +1560,12 @@ class DexFile(object):
             # u4 nameIdx
             nameIdx = self.DexFieldIdList[index].nameIdx
 
-            print '    #%s (%s~%s)' % (hex(index), hex(self.DexFieldIdList[index].offset), hex(self.DexFieldIdList[index].offset + self.DexFieldIdList[index].length))
-            print '    DexFieldId[%d]->classIdx=%s\t#%s' % (index, hex(classIdx), self.getDexStringId(classIdx))
-            print '    DexFieldId[%d]->typeIdx=%s\t#%s' % (index, hex(typeIdx), self.getDexStringId(typeIdx))
-            print '    DexFieldId[%d]->nameIdx=%s\t#%s' % (index, hex(nameIdx), self.getDexStringId(nameIdx))
-            print ''
+            print('    #%s (%s~%s)' % (hex(index), hex(self.DexFieldIdList[index].offset),
+                                       hex(self.DexFieldIdList[index].offset + self.DexFieldIdList[index].length)))
+            print('    DexFieldId[%d]->classIdx=%s\t#%s' % (index, hex(classIdx), self.getDexStringId(classIdx)))
+            print('    DexFieldId[%d]->typeIdx=%s\t#%s' % (index, hex(typeIdx), self.getDexStringId(typeIdx)))
+            print('    DexFieldId[%d]->nameIdx=%s\t#%s' % (index, hex(nameIdx), self.getDexStringId(nameIdx)))
+            print('')
 
     def init_DexMethodId(self):
         method_ids_off = int(self.DexHeader.method_ids_off, 16)
@@ -1462,13 +1577,16 @@ class DexFile(object):
             # DexMethodId
             dexMethodIdObj = DexMethodId()
             # u2 classIdx
-            classIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+            classIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
             classIdx = int(classIdx_hex, 16)
             # u2 protoIdx
-            protoIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+            protoIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
             protoIdx = int(protoIdx_hex, 16)
             # u4 nameIdx
-            nameIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            nameIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             nameIdx = int(nameIdx_hex, 16)
 
             dexMethodIdObj.classIdx = classIdx
@@ -1480,8 +1598,8 @@ class DexFile(object):
             self.DexMethodIdList.append(dexMethodIdObj)
 
     def print_DexMethodId(self):
-        print '\n'
-        print '[+] DexMethodId:'
+        print('\n')
+        print('[+] DexMethodId:')
         for index in range(len(self.DexMethodIdList)):
             # DexMethodId
             # u2 classIdx
@@ -1491,11 +1609,13 @@ class DexFile(object):
             # u4 nameIdx
             nameIdx = self.DexMethodIdList[index].nameIdx
 
-            print '    #%s (%s~%s)' % (hex(index), hex(self.DexMethodIdList[index].offset), hex(self.DexMethodIdList[index].offset + self.DexMethodIdList[index].length))
-            print '    DexMethodId[%d]->classIdx=%s\t#%s' % (index, hex(classIdx), self.getDexTypeId(classIdx))
-            print '    DexMethodId[%d]->protoIdx=%s\t#%s' % (index, hex(protoIdx), self.DexProtoIdList[protoIdx].toString(self))
-            print '    DexMethodId[%d]->nameIdx =%s\t#%s' % (index, hex(nameIdx), self.DexStringIdList[nameIdx])
-            print ''
+            print('    #%s (%s~%s)' % (hex(index), hex(self.DexMethodIdList[index].offset),
+                                       hex(self.DexMethodIdList[index].offset + self.DexMethodIdList[index].length)))
+            print('    DexMethodId[%d]->classIdx=%s\t#%s' % (index, hex(classIdx), self.getDexTypeId(classIdx)))
+            print('    DexMethodId[%d]->protoIdx=%s\t#%s' % (
+                index, hex(protoIdx), self.DexProtoIdList[protoIdx].toString(self)))
+            print('    DexMethodId[%d]->nameIdx =%s\t#%s' % (index, hex(nameIdx), self.DexStringIdList[nameIdx]))
+            print('')
 
     def init_DexClassDef(self):
         class_defs_size_int = int(self.DexHeader.class_defs_size, 16)
@@ -1505,44 +1625,52 @@ class DexFile(object):
             dexClassDefObj = DexClassDef()
             self.dexClassDefList.append(dexClassDefObj)
 
-            #u4 classIdx
-            self.DexHeader.f.seek(class_defs_off_int + index*32, 0)
-            classIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            # u4 classIdx
+            self.DexHeader.f.seek(class_defs_off_int + index * 32, 0)
+            classIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             classIdx = int(classIdx_hex, 16)
 
-            #u4 accessFlags
-            self.DexHeader.f.seek(class_defs_off_int + index*32 + 4, 0)
-            accessFlags_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            # u4 accessFlags
+            self.DexHeader.f.seek(class_defs_off_int + index * 32 + 4, 0)
+            accessFlags_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             accessFlags = int(accessFlags_hex, 16)
 
-            #u4 superclassIdx
-            self.DexHeader.f.seek(class_defs_off_int + index*32 + 8, 0)
-            superclassIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            # u4 superclassIdx
+            self.DexHeader.f.seek(class_defs_off_int + index * 32 + 8, 0)
+            superclassIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             superclassIdx = int(superclassIdx_hex, 16)
 
-            #u4 interfaceOff
-            self.DexHeader.f.seek(class_defs_off_int + index*32 + 12, 0)
-            interfaceOff_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            # u4 interfaceOff
+            self.DexHeader.f.seek(class_defs_off_int + index * 32 + 12, 0)
+            interfaceOff_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             interfaceOff = int(interfaceOff_hex, 16)
 
-            #u4 sourceFieldIdx
-            self.DexHeader.f.seek(class_defs_off_int + index*32 + 16, 0)
-            sourceFieldIdx_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            # u4 sourceFieldIdx
+            self.DexHeader.f.seek(class_defs_off_int + index * 32 + 16, 0)
+            sourceFieldIdx_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             sourceFieldIdx = int(sourceFieldIdx_hex, 16)
 
-            #u4 annotationsOff
-            self.DexHeader.f.seek(class_defs_off_int + index*32 + 20, 0)
-            annotationsOff_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            # u4 annotationsOff
+            self.DexHeader.f.seek(class_defs_off_int + index * 32 + 20, 0)
+            annotationsOff_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             annotationsOff = int(annotationsOff_hex, 16)
 
-            #u4 classDataOff
-            self.DexHeader.f.seek(class_defs_off_int + index*32 + 24, 0)
-            classDataOff_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            # u4 classDataOff
+            self.DexHeader.f.seek(class_defs_off_int + index * 32 + 24, 0)
+            classDataOff_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             classDataOff = int(classDataOff_hex, 16)
 
-            #u4 staticValueOff
+            # u4 staticValueOff
             self.DexHeader.f.seek(class_defs_off_int + index * 32 + 28, 0)
-            staticValueOff_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+            staticValueOff_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
             staticValueOff = int(staticValueOff_hex, 16)
 
             dexClassDefObj.classIdx = classIdx
@@ -1743,82 +1871,98 @@ class DexFile(object):
                     dexMethod.dexCode = None
 
     def print_DexClassDef(self):
-        print '\n'
-        print '[+] DexClassDef:'
+        print('\n')
+        print('[+] DexClassDef:')
 
         for index in range(len(self.dexClassDefList)):
             dexClassDefObj = self.dexClassDefList[index]
-            print '    #%s~%s' % (hex(dexClassDefObj.offset), hex(dexClassDefObj.offset + dexClassDefObj.length))
-            print '    DexClassDef[%d]:\t' % index
-            print '    DexClassDef[%d]->classIdx\t= %s\t#%s' % (index, hex(dexClassDefObj.classIdx), self.getDexTypeId(dexClassDefObj.classIdx))
-            print '    DexClassDef[%d]->accessFlags\t= %s' % (index, hex(dexClassDefObj.accessFlags) )
-            print '    DexClassDef[%d]->superclassIdx\t= %s\t#%s' % (index, hex(dexClassDefObj.superclassIdx), self.getDexTypeId(dexClassDefObj.superclassIdx))
-            print '    DexClassDef[%d]->interfaceOff\t= %s' % (index, hex(dexClassDefObj.interfaceOff))
+            print('    #%s~%s' % (hex(dexClassDefObj.offset), hex(dexClassDefObj.offset + dexClassDefObj.length)))
+            print('    DexClassDef[%d]:\t' % index)
+            print('    DexClassDef[%d]->classIdx\t= %s\t#%s' % (
+                index, hex(dexClassDefObj.classIdx), self.getDexTypeId(dexClassDefObj.classIdx)))
+            print('    DexClassDef[%d]->accessFlags\t= %s' % (index, hex(dexClassDefObj.accessFlags)))
+            print('    DexClassDef[%d]->superclassIdx\t= %s\t#%s' % (
+                index, hex(dexClassDefObj.superclassIdx), self.getDexTypeId(dexClassDefObj.superclassIdx)))
+            print('    DexClassDef[%d]->interfaceOff\t= %s' % (index, hex(dexClassDefObj.interfaceOff)))
             if dexClassDefObj.sourceFieldIdx == 0xffffffff:
-                print '    DexClassDef[%d]->sourceFieldIdx\t= %s\t#UNKNOWN' % (index, hex(dexClassDefObj.sourceFieldIdx))
+                print(
+                    '    DexClassDef[%d]->sourceFieldIdx\t= %s\t#UNKNOWN' % (index, hex(dexClassDefObj.sourceFieldIdx)))
             else:
-                print '    DexClassDef[%d]->sourceFieldIdx\t= %s\t#%s' % (index, hex(dexClassDefObj.sourceFieldIdx), self.DexStringIdList[dexClassDefObj.sourceFieldIdx])
-            print '    DexClassDef[%d]->annotationsOff\t= %s' % (index, hex(dexClassDefObj.annotationsOff))
-            print '    DexClassDef[%d]->classDataOff\t= %s' % (index, hex(dexClassDefObj.classDataOff))
-            print '    DexClassDef[%d]->staticValueOff\t= %s' % (index, hex(dexClassDefObj.staticValueOff))
+                print('    DexClassDef[%d]->sourceFieldIdx\t= %s\t#%s' % (
+                    index, hex(dexClassDefObj.sourceFieldIdx), self.DexStringIdList[dexClassDefObj.sourceFieldIdx]))
+            print('    DexClassDef[%d]->annotationsOff\t= %s' % (index, hex(dexClassDefObj.annotationsOff)))
+            print('    DexClassDef[%d]->classDataOff\t= %s' % (index, hex(dexClassDefObj.classDataOff)))
+            print('    DexClassDef[%d]->staticValueOff\t= %s' % (index, hex(dexClassDefObj.staticValueOff)))
             if dexClassDefObj.classDataOff == 0:
                 continue
-            print '    ------------------------------------------------------------------------'
-            print '    # %s~%s' % (hex(dexClassDefObj.header.offset), hex(dexClassDefObj.header.offset + dexClassDefObj.header.length))
-            print '    DexClassDef[%d]->DexClassData->DexClassDataHeader->staticFieldsSize \t= %s' % (index, hex(dexClassDefObj.header.staticFieldsSize))
-            print '    DexClassDef[%d]->DexClassData->DexClassDataHeader->instanceFieldsSize \t= %s' % (index, hex(dexClassDefObj.header.instanceFieldsSize))
-            print '    DexClassDef[%d]->DexClassData->DexClassDataHeader->directMethodsSize \t= %s' % (index, hex(dexClassDefObj.header.directMethodsSize))
-            print '    DexClassDef[%d]->DexClassData->DexClassDataHeader->virtualMethodsSize \t= %s' % (index, hex(dexClassDefObj.header.virtualMethodsSize))
+            print('    ------------------------------------------------------------------------')
+            print('    # %s~%s' % (
+                hex(dexClassDefObj.header.offset), hex(dexClassDefObj.header.offset + dexClassDefObj.header.length)))
+            print('    DexClassDef[%d]->DexClassData->DexClassDataHeader->staticFieldsSize \t= %s' % (
+                index, hex(dexClassDefObj.header.staticFieldsSize)))
+            print('    DexClassDef[%d]->DexClassData->DexClassDataHeader->instanceFieldsSize \t= %s' % (
+                index, hex(dexClassDefObj.header.instanceFieldsSize)))
+            print('    DexClassDef[%d]->DexClassData->DexClassDataHeader->directMethodsSize \t= %s' % (
+                index, hex(dexClassDefObj.header.directMethodsSize)))
+            print('    DexClassDef[%d]->DexClassData->DexClassDataHeader->virtualMethodsSize \t= %s' % (
+                index, hex(dexClassDefObj.header.virtualMethodsSize)))
             if len(dexClassDefObj.staticFields) > 0:
-                print '    ------------------------------------------------------------------------'
-                print '    # %s~%s' % (hex(dexClassDefObj.staticFields[0].offset), hex(dexClassDefObj.staticFields[-1].offset + dexClassDefObj.staticFields[-1].length))
+                print('    ------------------------------------------------------------------------')
+                print('    # %s~%s' % (hex(dexClassDefObj.staticFields[0].offset), hex(
+                    dexClassDefObj.staticFields[-1].offset + dexClassDefObj.staticFields[-1].length)))
             if len(dexClassDefObj.staticFields) < 0 and len(dexClassDefObj.instanceFields) > 0:
-                print '    ------------------------------------------------------------------------'
-                print '    # %s~%s' % (hex(dexClassDefObj.instanceFields[0].offset), hex(
-                    dexClassDefObj.instanceFields[-1].offset + dexClassDefObj.instanceFields[-1].length))
+                print('    ------------------------------------------------------------------------')
+                print('    # %s~%s' % (hex(dexClassDefObj.instanceFields[0].offset), hex(
+                    dexClassDefObj.instanceFields[-1].offset + dexClassDefObj.instanceFields[-1].length)))
             lastFieldIdx = 0
             for k in range(len(dexClassDefObj.staticFields)):
                 currFieldIdx = lastFieldIdx + dexClassDefObj.staticFields[k].fieldIdx
                 fieldName = self.getDexStringId(self.DexFieldIdList[currFieldIdx].nameIdx)
                 lastFieldIdx = currFieldIdx
-                print '    DexClassDef[%d]->DexClassData->staticFields[%d]\t= %s\t#%s' % (index, k, fieldName, dexClassDefObj.staticFields[k])
+                print('    DexClassDef[%d]->DexClassData->staticFields[%d]\t= %s\t#%s' % (
+                    index, k, fieldName, dexClassDefObj.staticFields[k]))
 
             lastFieldIdx = 0
             for k in range(len(dexClassDefObj.instanceFields)):
                 currFieldIdx = lastFieldIdx + dexClassDefObj.instanceFields[k].fieldIdx
                 fieldName = self.getDexStringId(self.DexFieldIdList[currFieldIdx].nameIdx)
                 lastFieldIdx = currFieldIdx
-                print '    DexClassDef[%d]->DexClassData->instanceFields[%d]\t= %s\t#%s' % (index, k, fieldName, dexClassDefObj.instanceFields[k])
+                print('    DexClassDef[%d]->DexClassData->instanceFields[%d]\t= %s\t#%s' % (
+                    index, k, fieldName, dexClassDefObj.instanceFields[k]))
 
             if len(dexClassDefObj.staticFields) + len(dexClassDefObj.instanceFields) > 0:
-                print '    ------------------------------------------------------------------------'
+                print('    ------------------------------------------------------------------------')
 
             lastMethodIdx = 0
             for k in range(len(dexClassDefObj.directMethods)):
                 currMethodIdx = lastMethodIdx + dexClassDefObj.directMethods[k].methodIdx
                 dexMethodIdObj = self.DexMethodIdList[currMethodIdx]
                 lastMethodIdx = currMethodIdx
-                print '    # %s~%s' % (hex(dexClassDefObj.directMethods[k].offset), hex(dexClassDefObj.directMethods[k].offset + dexClassDefObj.directMethods[k].length))
-                print '    DexClassDef[%d]->DexClassData->directMethods[%d]\t= %s\t#%s' % (index, k, dexMethodIdObj.toString(self), dexClassDefObj.directMethods[k])
+                print('    # %s~%s' % (hex(dexClassDefObj.directMethods[k].offset), hex(
+                    dexClassDefObj.directMethods[k].offset + dexClassDefObj.directMethods[k].length)))
+                print('    DexClassDef[%d]->DexClassData->directMethods[%d]\t= %s\t#%s' % (
+                    index, k, dexMethodIdObj.toString(self), dexClassDefObj.directMethods[k]))
                 self.dumpDexCode(dexClassDefObj.directMethods[k])
-                print '    ------------------------------------------------------------------------'
+                print('    ------------------------------------------------------------------------')
 
             lastMethodIdx = 0
             for k in range(len(dexClassDefObj.virtualMethods)):
                 currMethodIdx = lastMethodIdx + dexClassDefObj.virtualMethods[k].methodIdx
                 dexMethodIdObj = self.DexMethodIdList[currMethodIdx]
                 lastMethodIdx = currMethodIdx
-                print '    # %s~%s' % (hex(dexClassDefObj.virtualMethods[k].offset), hex(dexClassDefObj.virtualMethods[k].offset + dexClassDefObj.virtualMethods[k].length))
-                print '    DexClassDef[%d]->DexClassData->virtualMethods[%d]\t= %s\t#%s' % (index, k, dexMethodIdObj.toString(self), dexClassDefObj.virtualMethods[k])
+                print('    # %s~%s' % (hex(dexClassDefObj.virtualMethods[k].offset), hex(
+                    dexClassDefObj.virtualMethods[k].offset + dexClassDefObj.virtualMethods[k].length)))
+                print('    DexClassDef[%d]->DexClassData->virtualMethods[%d]\t= %s\t#%s' % (
+                    index, k, dexMethodIdObj.toString(self), dexClassDefObj.virtualMethods[k]))
                 self.dumpDexCode(dexClassDefObj.virtualMethods[k])
-                print '    ------------------------------------------------------------------------'
-            print '\n'
+                print('    ------------------------------------------------------------------------')
+            print('\n')
 
     def dumpDexCode(self, dexMethod):
         if dexMethod.dexCode == None:
             return
-        print '    # %s~%s' % (hex(dexMethod.dexCode.offset), hex(dexMethod.dexCode.offset + dexMethod.dexCode.length))
-        print '    DexCode=%s' % dexMethod.dexCode
+        print('    # %s~%s' % (hex(dexMethod.dexCode.offset), hex(dexMethod.dexCode.offset + dexMethod.dexCode.length)))
+        print('    DexCode=%s' % dexMethod.dexCode)
         offset = 0
         insnsSize = dexMethod.dexCode.insnsSize * 4
 
@@ -1832,8 +1976,9 @@ class DexFile(object):
             if smaliCode == None:
                 continue
 
-            insns = dexMethod.dexCode.insns[decodedInstruction.offset:decodedInstruction.offset + decodedInstruction.length]
-            print '    \t%-16s|%04x: %s' % (insns, offset/4, smaliCode)
+            insns = dexMethod.dexCode.insns[
+                    decodedInstruction.offset:decodedInstruction.offset + decodedInstruction.length]
+            print('    \t%-16s|%04x: %s' % (insns, offset / 4, smaliCode))
             offset += len(insns)
 
             if smaliCode == 'nop':
@@ -1842,35 +1987,41 @@ class DexFile(object):
     def parseDexCode(self, codeOff):
         self.DexHeader.f.seek(codeOff, 0)
 
-        registersSize_hex = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+        registersSize_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
         registersSize = int(registersSize_hex, 16)
 
-        insSize_hex = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+        insSize_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
         insSize = int(insSize_hex, 16)
 
-        outsSize_hex = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+        outsSize_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
         outsSize = int(outsSize_hex, 16)
 
-        triesSize_hex = binascii.b2a_hex(self.DexHeader.f.read(2)).decode('hex')[::-1].encode('hex')
+        triesSize_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(2)), 'hex_codec')[::-1],
+                      'hex_codec')
         triesSize = int(triesSize_hex, 16)
 
-        debugInfoOff_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+        debugInfoOff_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
         debugInfoOff = int(debugInfoOff_hex, 16)
 
-        insnsSize_hex = binascii.b2a_hex(self.DexHeader.f.read(4)).decode('hex')[::-1].encode('hex')
+        insnsSize_hex = codecs.encode(codecs.decode(binascii.b2a_hex(self.DexHeader.f.read(4)), 'hex_codec')[::-1],
+                      'hex_codec')
         insnsSize = int(insnsSize_hex, 16)
 
         if insnsSize == 0:
             insns = ''
         else:
-            if insnsSize*2 > sys.maxint:
-                size = insnsSize*2
+            if insnsSize * 2 > sys.maxsize:
+                size = insnsSize * 2
                 insns = ''
-                while size > sys.maxint:
-                    insns += binascii.b2a_hex(self.DexHeader.f.read(sys.maxint))
-                    size -= sys.maxint
+                while size > sys.maxsize:
+                    insns += binascii.b2a_hex(self.DexHeader.f.read(sys.maxsize))
+                    size -= sys.maxsize
             else:
-                insns = binascii.b2a_hex(self.DexHeader.f.read(insnsSize*2))
+                insns = binascii.b2a_hex(self.DexHeader.f.read(insnsSize * 2))
 
         dexCode = DexCode()
         dexCode.registersSize = registersSize
@@ -1882,33 +2033,34 @@ class DexFile(object):
         dexCode.insns = insns
 
         dexCode.offset = codeOff
-        dexCode.length = 16 + len(insns)/2
+        dexCode.length = 16 + len(insns) / 2
 
         return dexCode
 
     def readUnsignedLeb128(self, hex_value):
-        byte_counts = len(hex_value)/2
+        byte_counts = len(hex_value) / 2
 
-        #找出第一个不是0的byte位置
+        # 找出第一个不是0的byte位置
         index = 0
-        for i in range(byte_counts):
-            v1 = int(hex_value[i*2:i*2+2], 16)
+        for i in range(int(byte_counts)):
+            v1 = int(hex_value[i * 2:i * 2 + 2], 16)
             if v1 > 0:
                 index = i
                 break
 
-        hex_value = hex_value[index*2:]
-        byte_counts = len(hex_value)/2
+        hex_value = hex_value[index * 2:]
+        byte_counts = len(hex_value) / 2
 
         result = 0
-        for i in range(byte_counts):
-            cur = int(hex_value[i*2:i*2+2], 16)
+        for i in range(int(byte_counts)):
+            cur = int(hex_value[i * 2:i * 2 + 2], 16)
             if cur > 0x7f:
-                result = result | ((cur & 0x7f) << (7*i))
+                result = result | ((cur & 0x7f) << (7 * i))
             else:
-                result = result | ((cur & 0x7f) << (7*i))
+                result = result | ((cur & 0x7f) << (7 * i))
                 break
         return result
+
 
 class DexHeader(object):
     def __init__(self, ):
@@ -1953,9 +2105,10 @@ class DexProtoId(object):
 
     def toString(self, dexFile):
         if self.dexTypeList:
-            return '%s%s' % (self.dexTypeList.toString(dexFile),  dexFile.getDexTypeId(self.returnTypeIdx))
+            return '%s%s' % (self.dexTypeList.toString(dexFile), dexFile.getDexTypeId(self.returnTypeIdx))
         else:
             return '()%s' % dexFile.getDexTypeId(self.returnTypeIdx)
+
 
 class DexTypeList(object):
     def __init__(self, ):
@@ -1969,6 +2122,7 @@ class DexTypeList(object):
             for idx in self.list:
                 parametersStr += dexFile.getDexTypeId(idx) + ','
         return '(%s)' % parametersStr
+
 
 class DexMethodId(object):
     def __init__(self, ):
@@ -1992,9 +2146,10 @@ class DexMethodId(object):
     def toApi(self, dexFile):
         if (self.classIdx != None) and (self.protoIdx != None) and (self.nameIdx != None):
             return '%s->%s' % (dexFile.getDexTypeId(self.classIdx),
-                                 dexFile.getDexStringId(self.nameIdx))
+                               dexFile.getDexStringId(self.nameIdx))
         else:
             return None
+
 
 class DexFieldId(object):
     def __init__(self, ):
@@ -2015,8 +2170,9 @@ class DexFieldId(object):
         else:
             return None
 
+
 class DexClassDef(object):
-    def __init__(self,):
+    def __init__(self, ):
         super(DexClassDef, self).__init__()
         self.classIdx = None
         self.accessFlags = None
@@ -2037,8 +2193,10 @@ class DexClassDef(object):
         self.offset = None
         self.length = 0
 
+
 class DexClassDataHeader(object):
     """docstring for ClassName"""
+
     def __init__(self):
         super(DexClassDataHeader, self).__init__()
         self.staticFieldsSize = None
@@ -2050,8 +2208,10 @@ class DexClassDataHeader(object):
         self.offset = None
         self.length = 0
 
+
 class DexField(object):
     """docstring for DexField"""
+
     def __init__(self):
         super(DexField, self).__init__()
         self.fieldIdx = None
@@ -2067,6 +2227,7 @@ class DexField(object):
 
 class DexMethod(object):
     """docstring for DexMethod"""
+
     def __init__(self):
         super(DexMethod, self).__init__()
         self.methodIdx = None
@@ -2080,10 +2241,13 @@ class DexMethod(object):
         self.dexCode = DexCode()
 
     def __str__(self):
-        return '[methodIdx = %s, accessFlags = %s, codeOff = %s]' % (hex(self.methodIdx), hex(self.accessFlags), hex(self.codeOff))
+        return '[methodIdx = %s, accessFlags = %s, codeOff = %s]' % (
+            hex(self.methodIdx), hex(self.accessFlags), hex(self.codeOff))
+
 
 class DexCode(object):
     """docstring for DexCode"""
+
     def __init__(self):
         super(DexCode, self).__init__()
         self.registersSize = None
@@ -2100,7 +2264,8 @@ class DexCode(object):
 
     def __str__(self):
         return '[registersSize = %s, insSize = %s, outsSize = %s, triesSize = %s, debugInfoOff = %s, insnsSize = %s, insns = %s]' % \
-                (self.registersSize, self.insSize, self.outsSize, self.triesSize, hex(self.debugInfoOff), self.insnsSize, self.insns)
+               (self.registersSize, self.insSize, self.outsSize, self.triesSize, hex(self.debugInfoOff), self.insnsSize,
+                self.insns)
 
 
 def main():
@@ -2113,6 +2278,7 @@ def main():
     dex.print_DexFieldId()
     dex.print_DexMethodId()
     dex.print_DexClassDef()
+
 
 if __name__ == '__main__':
     main()

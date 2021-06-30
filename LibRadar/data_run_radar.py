@@ -10,7 +10,7 @@ total = 10
 while i < total:
     try:
         i += 1
-        print "Progress %d" % i
+        print("Progress %d" % i)
         apk_path = apks[i]
         lrd = libradar.LibRadar(apk_path)
         res = lrd.compare()
@@ -20,6 +20,6 @@ while i < total:
         #        print "NOT_MATCH_PACKAGE_NAME"
         #        print item["Standard Package"]
         #        print item["Package"]
-    except Exception, e:
+    except Exception as e:
         total += 1
-        print Exception,":", e
+        print(e)

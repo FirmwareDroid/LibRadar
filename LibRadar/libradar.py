@@ -97,7 +97,7 @@ class LibRadar(object):
             logger.critical("file path %s is not a file" % self.apk_path)
             raise AssertionError
         file_sha256 = hashlib.sha256()
-        f = file(self.apk_path, 'rb')
+        f = open(self.apk_path, 'rb') # changed
         while True:
             block = f.read(4096)
             if not block:
@@ -182,7 +182,8 @@ class LibRadar(object):
                 such as '\x01Lcom/vungle/publisher/inject'
             don't know exactly but could use code below to deal with it.
             """
-            if class_name[0] is not 'L':
+            print(class_name[0])
+            if isinstance(class_name[0], str) and class_name[0] != 'L':
                 l_index = class_name.find('L')
                 if l_index == '-1':
                     continue
