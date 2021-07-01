@@ -21,9 +21,9 @@
 
 
 import sys
-from ._settings import *
-from .dex_tree import *
-from .dex_parser import *
+import _settings
+import dex_tree
+import dex_parser
 import hashlib
 import zipfile
 import json
