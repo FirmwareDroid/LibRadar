@@ -44,7 +44,8 @@ class Util(object):
         feature_str = ""
         assert type(kvd) == dict, 'kvd is a dictionary'
         items = kvd.items()
-        items.sort()
+        items = dict(sorted(kvd.items(), key=lambda x: x[1]))
+        #items.sort()
         for item in items:
             if type(item[0]) is not int:
                 logger.error("Key not int")

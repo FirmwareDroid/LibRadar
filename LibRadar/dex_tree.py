@@ -18,15 +18,13 @@
 #   DEX Tree
 #
 #   This script is used to implement the tree node and tree structure.
-
-
+from . import rputil
 from ._settings import *
 from collections import Counter
 import hashlib
 import csv
 import redis
 import zlib
-from .rputil import *
 
 
 # tag_rules
@@ -405,7 +403,11 @@ class Tree(object):
         self.pre_order_res_ret(visit=self._get_repackage_main, res=pn_list, ret=ret)
         ret_length = len(ret)
         kvd = dict(Counter(ret))
-        str = rputil.Util.dict2str(kvd)
-        zstr = zlib.compress(str,1)
-        self.db_rep.hset(name="apk_feature", key=hex_sha256, value=zstr)
-        self.db_rep.zadd("apk_weight", ret_length, hex_sha256 )
+        kvd_str = rputil.Util.dict2str(kvd)
+        zstr = zlib.compress(kvd_str.encode('utf-8'))
+        print(f"ret_length: {ret_length} {type(ret_length)}")
+        print(f"zstr: {zstr} {type(zstr)}")
+        print(f"hex_sha256: {hex_sha256} {type(hex_sha256)}")
+        self.db_rep.hset(name="apk_feature", key=hex_sha256, value=zstr, mapping={ret_length, hex_sha256})
+        self.db_rep.zadd(name="apk_weight", mapping={ret_length, hex_sha256})
+
